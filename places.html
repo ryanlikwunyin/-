@@ -2,42 +2,41 @@
 <html lang="zh-HK">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#193f45">
 <title>景點閱讀卡｜絲路研學誌</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f6f2e9;color:#223639;font:17px/1.65 system-ui,sans-serif}
 main{max-width:680px;margin:auto;padding:16px 16px 48px}
-a{color:#205851}
-.back{display:inline-block;padding:8px 0 14px;font-weight:650;text-decoration:none}
-header{background:#193f45;color:#fff9ed;border-radius:18px;padding:24px}
-header small,.label{font-size:13px;letter-spacing:.1em;font-weight:700}
+.back{display:inline-block;padding:8px 0 14px;color:#205851;text-decoration:none;font-weight:650}
+header{background:#193f45;color:#fff9ed;border-radius:18px;padding:23px}
+header small,.tag{font-size:13px;font-weight:700;letter-spacing:.06em}
 h1{font:700 34px/1.3 ui-serif,"Songti TC",serif;margin:8px 0}
-header p{margin:4px 0}
-.filters{display:flex;gap:8px;margin:18px 0 6px;flex-wrap:wrap}
-.filters button{font:inherit;border:1px solid #9dada6;border-radius:20px;
+header p{margin:5px 0}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 7px}
+button{font:inherit;min-height:44px;border:1px solid #91a49d;border-radius:22px;
 background:#fffdf8;color:#23454a;padding:7px 18px;cursor:pointer}
-.filters button[aria-pressed="true"]{background:#193f45;color:white;border-color:#193f45}
-#count{display:block;color:#536565;margin:8px 2px 12px}
-details{background:#fffdf8;border:1px solid #d8d2c5;border-radius:14px;
-margin:0 0 10px;overflow:hidden}
-details[open]{border-color:#ac7654}
-summary{cursor:pointer;padding:15px 16px;list-style:none;display:flex;
-align-items:center;gap:12px}
+button[aria-pressed="true"]{background:#193f45;color:white}
+#count{display:block;color:#526462;margin:7px 2px 12px}
+details{background:#fffdf8;border:1px solid #d8d2c5;border-radius:14px;margin:0 0 10px}
+details[open]{border-color:#a66f4e}
+summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;padding:15px}
 summary::-webkit-details-marker{display:none}
-summary::after{content:"＋";margin-left:auto;color:#895038;font-size:22px}
+summary::after{content:"＋";margin-left:auto;color:#884e35;font-size:21px}
 details[open]>summary::after{content:"−"}
-.num{background:#f1e5d6;color:#784229;min-width:42px;height:42px;
-display:grid;place-items:center;border-radius:12px;font-weight:700}
-.meta{display:block;font-size:13px;color:#586864}
-.name{font-size:18px;display:block}
-.inside{padding:0 18px 18px}
-.inside p{margin:0 0 12px}
-.clue{padding:12px 14px;border-left:3px solid #bf8455;background:#f5eee2}
-.label{display:block;color:#80472b}
-.source{display:inline-block;padding:9px 13px;background:#e4eeea;border-radius:9px;
-text-decoration:none;font-weight:650}
+.num{min-width:42px;height:42px;display:grid;place-items:center;background:#f1e5d6;
+color:#784229;border-radius:12px;font-weight:700}
+.meta{display:block;font-size:13px;color:#536462}
+.name{display:block;font-size:18px}
+.inside{padding:0 17px 18px}
+.inside p{margin:5px 0 13px}
+.tag{color:#85492d}
+.clue{border-left:3px solid #bd8253;background:#f5eee2;padding:11px 13px}
+.clue b{display:block}
+.resource{display:inline-block;margin-top:15px;padding:9px 13px;background:#e4eeea;
+color:#205851;text-decoration:none;border-radius:9px;font-weight:650}
+.hint{display:block;color:#526462;margin-top:5px;font-size:14px}
 footer{font-size:13px;color:#536565;margin:20px 2px}
 </style>
 </head>
@@ -45,130 +44,154 @@ footer{font-size:13px;color:#536565;margin:20px 2px}
 <main>
 <a class="back" href="./index.html">← 返回絲路研學誌</a>
 <header>
-  <small>絲路研學誌　／　隨身導覽</small>
+  <small>絲路研學誌 ／ 香港延伸閱讀版</small>
   <h1>景點閱讀卡</h1>
-  <p>到站之前，先讀一張卡。到了現場，找一個只有親眼看見才會留意的細節。</p>
+  <p>先讀本站簡介，再收起手機找線索。想知道更多，可打開卡內的香港延伸閱讀。</p>
 </header>
-<nav class="filters" aria-label="按城市篩選">
+
+<nav aria-label="按城市篩選">
   <button type="button" data-city="全部" aria-pressed="true">全部</button>
   <button type="button" data-city="西安" aria-pressed="false">西安</button>
   <button type="button" data-city="敦煌" aria-pressed="false">敦煌</button>
 </nav>
 <small id="count" role="status"></small>
-<section id="list" aria-label="景點卡片"></section>
-<footer>點景點名稱可展開或收起。標有 ↗ 的資料會另開外部網頁，需要網絡；返回原來的分頁即可繼續閱讀。</footer>
+<section id="list" aria-label="景點閱讀卡"></section>
+<footer>所有 ↗ 按鈕均連到香港來源，會另開分頁並需要網絡。外部閱讀屬自選，並非另一項功課。</footer>
 </main>
 
 <script>
-const dunhuangGuide="https://www.gswbj.gov.cn/a/2024/09/10/22009.html";
-const xianGuide="https://www.xa.gov.cn/ztzl/ztzl/lzledc/ywdc/64e6beb4f8fd1c1a703777a9.html";
+const silk = "https://chiculture.org.hk/tc/china-five-thousand-years/303";
+const report = "https://www.hkcd.com.hk/content_app/2024-08/09/content_8651149.html";
+const pdf = "https://chiculture.org.hk/sites/mainsite/files/2021-12/01_QEF中史_課題二_360全景圖考察指南.pdf";
 
-const cards=[
-["12/18","西安","西安鼓樓","城市與時間",
- "今天，我們看手機就知道時間。從前，鼓聲卻可以是城市生活的時間訊號。站在鼓樓下，不妨先不看鐘錶，想像同一陣鼓聲傳到不同街巷時，人們會怎樣回應。",
- "退後幾步，看一看樓的位置和高度。假如要把訊息傳給街上的人，這個位置有甚麼好處？",
- "西安市政府｜認識西安鐘鼓樓與古城",xianGuide],
+// 每張卡依次是：日期、城市、景點、簡介、觀察提示、按鈕、網址、閱讀提示。
+const cards = [
+["12/18","西安","西安鼓樓",
+ "今天看時間，只要低頭看一眼手機。從前鼓樓的鼓聲卻把時間傳到街上，讓許多人同時接收到一個訊息。看看鼓樓和周圍街道的位置，想想這種報時方式怎樣影響城市生活。",
+ "從遠、近兩個位置看鼓樓。哪個位置最能讓你理解，為甚麼它要建得這麼高？",
+ "讀鼓樓與鐘樓｜中國文化研究院",
+ "https://chiculture.org.hk/tc/china-five-thousand-years/549",
+ "建築背景：打開文章後，找與西安鐘樓、鼓樓相關的段落。"],
 
-["12/18","西安","大唐不夜城","唐風與當代演出",
- "這裏是以盛唐文化為主題的現代步行街。唐詩、服飾、雕塑和舞台演出，都是今天的人用來講述長安故事的方式。它和真正留存至今的古蹟，是兩種不同的歷史體驗。",
- "選一個最有「唐風」的畫面。如果拿走燈光和音樂，你仍會聯想到唐代嗎？",
- "曲江新區｜認識大唐不夜城街區",
- "https://qjxq.xa.gov.cn/zsyz/tzhj/1946143355385155585.html"],
+["12/18","西安","大唐不夜城",
+ "大唐不夜城是今天的人以盛唐文化為主題設計的街區。燈光、服飾、雕塑和演出可以營造歷史感，但「讓人想到唐代」與「從唐代保存至今」是兩回事。",
+ "選一個令你想到唐代的細節。如果拿走燈光和音樂，你還會有同一個聯想嗎？",
+ "看第一天考察重點｜薪火相傳",
+ "https://www.passontorch.org.hk/zh-hant/programmes/list/14/897.html",
+ "行程資料：在香港的交流計劃頁找到「第一天」，看看為何把鼓樓和大唐不夜城放在一起考察。"],
 
-["12/19","西安","秦始皇帝陵博物院","從一尊陶俑看整個軍陣",
- "兵馬俑坑是秦始皇帝陵的陪葬坑，不是皇帝的墓室。站在坑前，可以把視線拉遠看整體隊列，再拉近看一尊俑：同一個軍陣，其實可以從兩種很不同的尺度閱讀。",
- "先不說「很壯觀」。如果只能用三個可見細節描述眼前的一尊俑，你會選哪三個？",
- "秦始皇帝陵博物院｜陵園與兵馬俑坑",
- "https://www.bmy.com.cn/about/"],
+["12/19","西安","秦始皇帝陵博物院",
+ "兵馬俑坑是秦始皇帝陵的陪葬坑，不是皇帝的墓室。退後看，目光會落在隊列；只看一尊俑，又會留意到髮式、衣着和動作。兩種距離都能讀出資料。",
+ "挑一尊看得清楚的陶俑。不說位置，只用三個可見細節，讓同伴猜猜你選了哪一尊。",
+ "比較秦俑與漢俑｜香港歷史博物館",
+ "https://hk.history.museum/tc/web/mh/exhibition/2025_past_01.html",
+ "過往展覽：這是「天下一統——陝西秦漢文明展」的香港展覽資料，不是購票頁。"],
 
-["12/20","敦煌","陽關遺址及博物館","從詩句走進邊關",
- "不少人先從王維的送別詩認識陽關。來到現場，除了讀詩，還可以辨認兩類線索：古代留下的遺跡，以及現代博物館為幫助觀眾理解歷史而設的展示。",
- "找一塊展板：它用甚麼字眼告訴你，眼前的是遺址、復原場景，還是出土文物？",
- "甘肅文旅｜閱讀「陽關博物館」介紹",dunhuangGuide],
+["12/20","敦煌","陽關遺址及博物館",
+ "你也許先從王維的送別詩認識陽關。到達現場後，試分開兩種閱讀：詩句讓人感受離別，遺址、文物和展板則幫助我們追問旅人如何出行。",
+ "找一塊展板，看看它用甚麼字眼說明眼前是遺址、出土文物，還是復原場景。",
+ "從陽關讀西域｜中國文化研究院",
+ silk,
+ "絲路背景：文章主題是張騫通西域。找出陽關與玉門關在文中的位置，而不是把文章當成博物館導覽。"],
 
-["12/20","敦煌","玉門關遺址","旅人為何要經過關口？",
- "玉門關是漢代通往西域的重要交通節點。把它想成旅人的一站，而不只是一座孤立建築：向前是甚麼地形？甚麼人、貨物和消息可能從這裏經過？",
- "轉身看看遺址四周。你會用哪一個方向的景象，向香港的同學解釋「邊關」？",
- "甘肅文旅｜閱讀「玉門關故址」介紹",dunhuangGuide],
+["12/20","敦煌","玉門關遺址",
+ "關口是旅程的一部分，不只是一座建築。看完眼前的遺址後轉身望向四周，想像旅人帶着貨物從哪裏來、往哪裏去，以及為何需要辨認方向。",
+ "如果只能拍一個方向的景象，哪個方向最能向沒來過的同學解釋「邊關」？為甚麼？",
+ "認識玉門關與西域｜中國文化研究院",
+ silk,
+ "絲路背景：這篇文章與陽關卡共用。今次請留意關口與往西路線的關係。"],
 
-["12/20","敦煌","敦煌雅丹國家地質公園","這是一座城嗎？",
- "有些雅丹像城牆，有些像塔樓，但它們不是人造建築。這些地貌是地表沉積物經侵蝕而成；在敦煌雅丹的形成過程中，風和水都參與了塑形。",
- "先替一處地貌改個形象化的名字，再不用比喻，只描述它的輪廓、層次和表面。",
- "甘肅文旅｜閱讀「雅丹地質公園」介紹",dunhuangGuide],
+["12/20","敦煌","敦煌雅丹國家地質公園",
+ "有些雅丹遠看像城牆，有些像船，但它們是受侵蝕形成的地貌，不是人工建築。用比喻可以記住形狀；用輪廓、方向和層次來描述，則方便同伴核對。",
+ "先替一處地貌改個名字，再不用「像」字，只描述你實際看到的形狀。",
+ "地理學生在雅丹看甚麼？｜香港中文大學",
+ "https://www.grm.cuhk.edu.hk/tc/field-trip/gansu-2010/",
+ "大學考察紀錄：在路線中找敦煌雅丹，將其中一個地理觀察重點與眼前景象比較。"],
 
-["12/21","敦煌","鳴沙山月牙泉","沙與水的邊界",
- "這裏的主角不是一座山或一泓泉，而是兩者竟能在同一幅景象中出現。觀察時可把視線從沙脊慢慢移到泉邊，留意線條、顏色和植被由哪裏開始改變。",
- "用手指在空中描一次沙脊，再描一次水邊。哪一條線條較容易看清？",
- "甘肅文旅｜閱讀「鳴沙山－月牙泉」介紹",dunhuangGuide],
+["12/21","敦煌","鳴沙山月牙泉",
+ "這裏不只可以看沙丘，也可以看沙與水如何出現在同一幅景象中。把視線從沙脊移到泉邊，找一處線條、顏色或植被明顯改變的地方。",
+ "試用手指在空中描出沙脊和水邊。如果只准畫兩條線，你會如何讓人認出這個地方？",
+ "看月牙泉圖文｜香港商報",
+ report,
+ "香港媒體圖文：在敦煌報道中找鳴沙山月牙泉，把記者選取的畫面與你的觀察比較。"],
 
-["12/21","敦煌","莫高窟","一面牆，怎樣講一個故事？",
- "洞窟的牆壁不只是裝飾，也可以用畫面講故事。一次參觀不必記住所有內容：只追蹤一個人物、一個動作或一段衣帶，已經是一種細讀。出發前可先到「數字敦煌」的資源庫練習觀看。",
- "在網上看一幅壁畫，找出第一個吸引你視線的細節。到現場請遵從導賞安排，離開洞窟後才用手機記錄。",
- "敦煌研究院｜進入數字敦煌",
- "https://www.e-dunhuang.com/"],
+["12/21","敦煌","莫高窟",
+ "壁畫不只可以看顏色，也可以看人物怎樣站立、手上拿着甚麼，以及誰正望向誰。先找一個細節，再追問它怎樣幫助你理解畫中的生活或故事。",
+ "遵從場館安排，不用在洞窟內操作手機。離開後，憑記憶描述一個人物動作或一件器物。",
+ "讀懂敦煌壁畫｜香港康文署",
+ "https://www.lcsd.gov.hk/tc/stth/programmes/glimpseandexhibition/dunhuang.html",
+ "香港展覽簡介：看看壁畫怎樣提供隋唐生活的線索。這個按鈕不是虛擬洞窟。"],
 
-["12/21","敦煌","敦煌石窟文物保護研究陳列中心","為甚麼要看複製窟？",
- "複製窟不是讓你「再看一次」那麼簡單。它讓觀眾有另一種觀看條件：可以比較畫面的位置、回看剛才錯過的細節，也可以思考研究人員怎樣記錄和展示原窟。",
- "選一個你在複製展示中看清楚的細節。它幫你回答了剛才在洞窟裏的哪個疑問？",
- "敦煌研究院｜陳列中心展覽介紹",
- "https://dunhuangcaves.org/jggk/jgsz/ywbm/ysyjb1/dhskwwbhyjclzx.htm"],
+["12/21","敦煌","敦煌石窟文物保護研究陳列中心",
+ "在洞窟裏，你可能首先留意「畫了甚麼」。到了保護研究展覽，換一條問題：研究人員怎樣記錄一幅壁畫，讓別人日後仍能比較它的位置、形狀和狀況？",
+ "在展覽中選一種記錄或展示方式。它幫你看清了原先哪個難以觀察的細節？",
+ "認識石窟數碼保育｜香港康文署博物館",
+ "https://www.museums.gov.hk/tc/web/portal/exhibition019.html",
+ "保育延伸：閱讀香港「數碼敦煌」的展覽資料，不是陳列中心官方網站。"],
 
-["12/21","敦煌","沙洲夜市","在當代生活裏找敦煌",
- "今天的考察從石窟走到市集。這一站不必尋找最古老的東西，反而可以看看人們今天怎樣使用「敦煌」這個名字：招牌、商品和圖案，各自選了甚麼來代表這座城市？",
- "找兩件用了相似圖案的東西。它們是在講同一個故事，還是只是用了相同的裝飾？",
- "延伸比較｜數字敦煌的藝術素材",
- "https://ip.e-dunhuang.com/"],
+["12/21","敦煌","沙洲夜市",
+ "從石窟來到市集，考察的對象由昔日圖像變成今天的生活。招牌、小食、工藝品和包裝，都能讓人看見商戶如何向遊人介紹敦煌。",
+ "不必購物。找兩件用了相似圖案的商品：相同圖案放在不同物件上，作用一樣嗎？",
+ "看沙洲夜市圖文｜香港商報",
+ report,
+ "香港媒體圖文：與月牙泉卡共用同一篇報道，今次請找「沙洲夜市」一節。"],
 
-["12/22","敦煌","敦煌市博物館","一張展品標籤怎樣讀？",
- "在地方博物館，可以從一件東西認識一座城。先讀名稱，再找年代、用途或出土地點。標籤寫得很短，反而適合練習分辨：哪些是館方提供的資料，哪些是你根據外形作出的猜想？",
- "挑一件展品，說一句「標籤告訴我……」，再說一句「我還想知道……」。這兩句就是你的導賞起點。",
- "延伸閱讀｜敦煌的博物館與文化展示",
- "https://www.gswbj.gov.cn/a/2024/10/23/22904.html"],
+["12/22","敦煌","敦煌市博物館",
+ "看一件展品，可以先讀名稱、年代和出土地點，再看實物。把館方提供的資料和自己根據外形作出的推測分開，是閱讀展覽很有用的習慣。",
+ "選一件展品，說兩句：「標籤告訴我……」「我仍想知道……」。哪一條疑問值得帶到今天的講座？",
+ "記者走進敦煌博物館｜香港經濟導報",
+ "https://www.jdonline.com.hk/content_91462.html",
+ "到館報道：先讀博物館部分，看看記者選擇介紹哪些展品；你會選同一件嗎？"],
 
-["12/23","西安","大唐芙蓉園","用園林講述盛唐",
- "大唐芙蓉園是仿照唐代皇家園林風格建造的現代文化園區。和博物館不同，這裏透過樓閣、園路和水景安排你的觀看次序：轉一個彎，眼前的主角便可能改變。",
- "選一處轉角，分別記住轉彎前後第一眼看到的景物。假如你是園林設計者，為甚麼要這樣安排？",
- "西安市政府｜大唐芙蓉園的設計背景",xianGuide]
+["12/23","西安","大唐芙蓉園",
+ "園林不只由一座座建築組成，還會透過路線和視線改變遊人的觀看次序。留意你如何從一個位置走到下一個位置，便能發現設計者怎樣安排景物出場。",
+ "在轉角停下，分別記住轉彎前後第一眼看到的景物。若要做導賞，你會請同學停在哪一步？",
+ "大唐芙蓉園考察指南（PDF）｜中國文化研究院",
+ pdf,
+ "香港教材 PDF：在指南中找「大唐芙蓉園」，看看如何從園內塑像觀察人物和生活場景。"]
 ];
 
-const list=document.getElementById("list");
-function make(tag,text,cls){
-  const node=document.createElement(tag);
-  node.textContent=text;
-  if(cls) node.className=cls;
+const list = document.getElementById("list");
+const buttons = document.querySelectorAll("[data-city]");
+
+function make(tag, text, cls) {
+  const node = document.createElement(tag);
+  if (text) node.textContent = text;
+  if (cls) node.className = cls;
   return node;
 }
-function show(city){
+
+function show(city) {
   list.replaceChildren();
-  let total=0;
-  cards.forEach((c,i)=>{
-    if(city!=="全部" && c[1]!==city) return;
+  let total = 0;
+  cards.forEach((c, i) => {
+    if (city !== "全部" && c[1] !== city) return;
     total++;
-    const box=document.createElement("details");
-    const head=document.createElement("summary");
-    head.append(make("span",String(i+1).padStart(2,"0"),"num"));
-    const words=document.createElement("span");
-    words.append(make("span",c[0]+" · "+c[1],"meta"),make("strong",c[2],"name"));
-    head.append(words);
-    const body=document.createElement("div");
-    body.className="inside";
-    body.append(make("p",c[3],"label"),make("p",c[4]));
-    const tip=make("div","","clue");
-    tip.append(make("b","現場留意","label"),document.createTextNode(c[5]));
-    const p=document.createElement("p");
-    p.style.marginTop="14px";
-    const link=make("a",c[6]+" ↗","source");
-    link.href=c[7]; link.target="_blank"; link.rel="noopener noreferrer";
-    p.append(link);body.append(tip,p);
-    box.append(head,body);list.append(box);
+    const box = make("details");
+    const top = make("summary");
+    const title = make("span");
+    title.append(make("small",c[0]+" · "+c[1],"meta"),make("strong",c[2],"name"));
+    top.append(make("span",String(i+1).padStart(2,"0"),"num"), title);
+
+    const body = make("div","","inside");
+    const clue = make("div","","clue");
+    clue.append(make("b","現場留意"), document.createTextNode(c[4]));
+
+    const link = make("a",c[5]+" ↗","resource");
+    link.href = c[6];
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+
+    body.append(make("strong","到站前讀一讀","tag"),make("p",c[3]),
+                clue,link,make("small",c[7],"hint"));
+    box.append(top,body);
+    list.append(box);
   });
-  document.getElementById("count").textContent=
-    (city==="全部"?"兩個城市":city)+" · "+total+" 張閱讀卡";
-  document.querySelectorAll("[data-city]").forEach(b=>
-    b.setAttribute("aria-pressed",String(b.dataset.city===city)));
+  document.getElementById("count").textContent =
+    (city === "全部" ? "西安 × 敦煌" : city) + " · " + total + " 張閱讀卡";
+  buttons.forEach(b => b.setAttribute("aria-pressed",String(b.dataset.city===city)));
 }
-document.querySelectorAll("[data-city]").forEach(b=>
-  b.addEventListener("click",()=>show(b.dataset.city)));
+buttons.forEach(b => b.addEventListener("click",()=>show(b.dataset.city)));
 show("全部");
 </script>
 </body>
