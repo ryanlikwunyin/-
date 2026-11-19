@@ -1,0 +1,12 @@
+{
+  "id": "./",
+  "name": "絲路研學誌",
+  "short_name": "絲路研學誌",
+  "lang": "zh-HK",
+  "description": "西安與敦煌六天考察：景點閱讀、每日手記、一景一聲與印記護照。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f2e9",
+  "theme_color": "#193f45"
+}
