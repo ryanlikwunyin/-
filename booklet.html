@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173d42">
+<title>一景一聲｜我的絲路有聲作品集</title>
+<style id="design">
+*{box-sizing:border-box}
+body{margin:0;background:#f6f1e7;color:#253638;font:17px/1.7 system-ui,sans-serif}
+main,.tools{max-width:720px;margin:auto;padding:16px}
+.tools{padding-bottom:0}
+.tools a{color:#205851}
+button,.save{display:inline-block;background:#205851;color:white!important;
+font:inherit;padding:10px 16px;border:0;border-radius:10px;text-decoration:none;cursor:pointer}
+button:disabled{opacity:.55}
+[hidden]{display:none!important}
+.cover{background:#173d42;color:#fff6e3;padding:32px 24px 0;border-radius:20px;overflow:hidden}
+.kicker,.date{font-size:13px;font-weight:700;letter-spacing:.12em}
+.kicker{color:#edc89d}
+h1,h2,.last{font-family:ui-serif,"Songti TC",serif}
+h1{font-size:clamp(44px,10vw,70px);line-height:1.1;margin:22px 0 8px}
+.cover p{margin:6px 0}
+.route{font-size:14px;color:#e6d7bd}
+.cover svg{display:block;width:calc(100% + 48px);height:52px;margin:20px -24px 0}
+article{background:#fffdf7;border:1px solid #d9cfbf;border-radius:16px;overflow:hidden;margin:20px 0}
+.chapter{padding:19px 20px 12px}
+.date{color:#87432f}
+h2{font-size:28px;line-height:1.3;margin:5px 0}
+.photo{display:block;width:100%;max-height:65vh;object-fit:contain;background:#eae2d5}
+.body{padding:4px 20px 18px}
+.note{white-space:pre-wrap;overflow-wrap:anywhere;border-left:3px solid #c4895d;padding-left:13px}
+.listen{font-weight:650;color:#205851;margin:14px 0 4px}
+audio{width:100%}
+.last{padding:22px;background:#e5eade;border-radius:14px;font-size:20px}
+#state{font-size:15px;color:#465b57}
+@media print{.tools{display:none}body{background:white}article{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="tools">
+  <a href="./index.html">← 返回絲路研學誌</a>
+  <p id="state" role="status">正在整理這部裝置上的記錄……</p>
+  <button type="button" id="make" hidden>製作可帶走的作品檔</button>
+  <a id="save" class="save" hidden>↓ 儲存我的有聲作品集</a>
+</div>
+
+<main id="book">
+  <header class="cover">
+    <div class="kicker">學生聲音展覽 ／ 2026 冬</div>
+    <h1>一景一聲</h1>
+    <p>我的絲路有聲作品集</p>
+    <p class="route">西安 → 敦煌 → 西安　｜　12 月 18–23 日</p>
+    <p>照片留下我看見的，聲音留下我當時想說的。</p>
+    <svg viewBox="0 0 600 52" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 43 Q100 -12 210 30 T425 19 T600 20 V52 H0Z" fill="#bd8b61"/>
+      <path d="M0 49 Q95 20 200 40 T420 32 T600 29 V52 H0Z" fill="#e4c49a"/>
+    </svg>
+  </header>
+  <div id="chapters"></div>
+  <p class="last" id="ending" hidden>把這一景、這一聲帶回香港。下一次走過熟悉的街道，願我仍會為一個從沒留意的細節停下來。</p>
+</main>
+
+<script>
+(() => {
+  const titles = ["古城初見","俑陣之間","走出關外","沙與壁畫","展品的提問","回望長安"];
+  const cities = ["西安","西安","敦煌","敦煌","敦煌","西安"];
+  const $ = id => document.getElementById(id);
+  const say = text => $("state").textContent = text;
+  const assets = [];
+  const node = (tag,text,cls) => {
+    const n=document.createElement(tag);
+    if(text) n.textContent=text;
+    if(cls) n.className=cls;
+    return n;
+  };
+
+  function openMedia(){
+    return new Promise((ok,no)=>{
+      const q=indexedDB.open("silkroad-daily-media-2026",1);
+      q.onupgradeneeded=()=>{
+        if(!q.result.objectStoreNames.contains("media"))
+          q.result.createObjectStore("media");
+      };
+      q.onsuccess=()=>ok(q.result);
+      q.onerror=()=>no(q.error);
+      q.onblocked=()=>no(Error("資料庫正由其他頁面使用"));
+    });
+  }
+  function read(db,key){
+    return new Promise((ok,no)=>{
+      const q=db.transaction("media","readonly").objectStore("media").get(key);
+      q.onsuccess=()=>ok(q.result);
+      q.onerror=()=>no(q.error);
+    });
+  }
+  function attach(element,blob){
+    element.dataset.asset=String(assets.push(blob)-1);
+    element.src=URL.createObjectURL(blob);
+  }
+  function embed(blob){
+    return new Promise((ok,no)=>{
+      const reader=new FileReader();
+      reader.onload=()=>ok(reader.result);
+      reader.onerror=()=>no(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function build(){
+    let db;
+    try{
+      const notes=JSON.parse(localStorage.getItem("silkroad-fieldnotes-2026-v1")||"[]");
+      db=await openMedia();
+      const pages=document.createDocumentFragment();
+      let days=0,pics=0,voices=0;
+
+      for(let i=0;i<6;i++){
+        const [photo,audio]=await Promise.all([read(db,i+":photo"),read(db,i+":audio")]);
+        const text=typeof notes?.[i]==="string"?notes[i].trim():"";
+        if(!text&&!photo&&!audio) continue;
+        days++;
+        const card=node("article");
+        const head=node("div","","chapter");
+        head.append(node("div","DAY 0"+(i+1)+"　／　12."+(18+i)+"　／　"+cities[i],"date"),
+                    node("h2",titles[i]));
+        card.append(head);
+        if(photo){
+          pics++;
+          const img=node("img","","photo");
+          img.alt="第"+(i+1)+"天在"+cities[i]+"拍下的考察相片";
+          attach(img,photo);card.append(img);
+        }
+        const body=node("div","","body");
+        if(text) body.append(node("p",text,"note"));
+        if(audio){
+          voices++;
+          body.append(node("p","我的現場聲音｜"+cities[i],"listen"));
+          const player=node("audio");
+          player.controls=true;player.preload="none";
+          player.setAttribute("aria-label","播放第"+(i+1)+"天的錄音");
+          attach(player,audio);body.append(player);
+        }
+        card.append(body);pages.append(card);
+      }
+
+      if(!days){
+        say("暫時找不到記錄。請從平日寫手記的同一部手機、同一個 App 圖示進入。若未開始記錄，可先返回首頁完成一天。不要清除網站資料。");
+        return;
+      }
+      $("chapters").append(pages);
+      $("ending").hidden=false;
+      $("make").hidden=false;
+      say("已排好 "+days+" 天記錄、"+pics+" 張相片、"+voices+" 段錄音。請先看一看、聽一聽，再儲存作品。");
+    }catch{
+      say("未能完整讀取記錄，暫不匯出。請從平日使用的裝置和 App 重開；原有資料沒有被刪除。");
+    }finally{if(db)db.close()}
+  }
+
+  $("make").onclick=async()=>{
+    $("make").disabled=true;
+    try{
+      const copy=$("book").cloneNode(true);
+      const media=copy.querySelectorAll("[data-asset]");
+      for(let i=0;i<media.length;i++){
+        say("正在把影音放入作品檔："+(i+1)+" / "+media.length+"，請勿關閉頁面。");
+        const el=media[i];
+        el.setAttribute("src",await embed(assets[Number(el.dataset.asset)]));
+        el.removeAttribute("data-asset");
+      }
+      const html='<!doctype html><html lang="zh-HK"><head><meta charset="utf-8">'+
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+        '<title>一景一聲｜我的絲路有聲作品集</title><style>'+
+        $("design").textContent+'</style></head><body>'+copy.outerHTML+'</body></html>';
+      const file=new Blob([html],{type:"text/html;charset=utf-8"});
+      const link=$("save");
+      link.href=URL.createObjectURL(file);
+      link.download="一景一聲-我的絲路有聲作品集.html";
+      link.hidden=false;$("make").hidden=true;
+      say("作品已製作，約 "+(file.size/1048576).toFixed(1)+" MB。請再按「儲存我的有聲作品集」下載。");
+      link.focus();
+    }catch{
+      say("未能完成作品檔。請關閉其他分頁後重試；原有相片、錄音和手記沒有改動。");
+      $("make").disabled=false;
+    }
+  };
+
+  build();
+})();
+</script>
+</body>
+</html>
