@@ -193,6 +193,28 @@ function show(city) {
 }
 buttons.forEach(b => b.addEventListener("click",()=>show(b.dataset.city)));
 show("全部");
+  // 今日導覽：從某一天進入時，直接展開指定景點。
+function openRouteCard() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  const place = params.get("place");
+  if (!place) return;
+
+  const card = cards.find(c => c[2] === place);
+  if (!card) return;
+
+  // 先選好城市，再從該城市的卡片找出這一站。
+  show(card[1]);
+  const box = Array.from(list.querySelectorAll("details")).find(
+    item => item.querySelector(".name")?.textContent === place
+  );
+  if (!box) return;
+
+  box.open = true;
+  requestAnimationFrame(() => box.scrollIntoView({ block: "start" }));
+}
+
+openRouteCard();
+window.addEventListener("hashchange", openRouteCard);
 </script>
 </body>
 </html>
