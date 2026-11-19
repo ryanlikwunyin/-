@@ -48,6 +48,76 @@ footer{margin-top:18px;font-size:13px}
 </header>
 
 <section id="home">
+  <div style="margin:16px 0">
+  <button type="button" class="action" id="packButton">
+    ↓ 下載離線考察包
+  </button>
+  <small id="packStatus" role="status" style="display:block;margin-top:6px">
+    出發前連上 Wi-Fi，儲存六天習作及 12 張景點卡。外部網站不包括在內。
+  </small>
+</div>
+
+<script>
+(() => {
+  const button = document.getElementById("packButton");
+  const status = document.getElementById("packStatus");
+  const cacheName = "silkroad-journal-offline-v1";
+  const pages = ["./index.html", "./places.html"].map(
+    path => new URL(path, location.href).href
+  );
+
+  if (!("serviceWorker" in navigator) || !("caches" in window)) {
+    button.disabled = true;
+    status.textContent = "此瀏覽器未能使用離線包，請在 Safari 打開學生首頁再試。";
+    return;
+  }
+
+  async function hasBothPages() {
+    const results = await Promise.all(
+      pages.map(url => caches.match(url, { cacheName }))
+    );
+    return results.every(response => response && response.ok);
+  }
+
+  function showReady() {
+    button.textContent = "重新下載離線考察包";
+    status.textContent = "✓ 已備妥六天習作及 12 張景點卡。香港外部連結仍需網絡。";
+  }
+
+  // 再次打開首頁時，檢查這部裝置是否仍保有兩頁。
+  if (navigator.serviceWorker.controller) {
+    hasBothPages().then(ok => {
+      if (ok && !button.disabled) showReady();
+    }).catch(() => {});
+  }
+
+  button.onclick = async () => {
+    button.disabled = true;
+    status.textContent = "正在下載，請保持連線，暫時不要關閉此頁……";
+    let timer;
+    try {
+      await Promise.race([
+        (async () => {
+          await navigator.serviceWorker.register("./sw.js");
+          await navigator.serviceWorker.ready;
+          const cache = await caches.open(cacheName);
+          await cache.addAll(pages.map(url => new Request(url, { cache: "reload" })));
+          if (!(await hasBothPages())) throw new Error("未完整下載");
+        })(),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error("逾時")), 45000);
+        })
+      ]);
+      showReady();
+    } catch {
+      status.textContent = "未能確認下載完成。請保持連線，稍後再按一次；原有手記不受影響。";
+    } finally {
+      clearTimeout(timer);
+      button.disabled = false;
+    }
+  };
+})();
+</script>
   <a href="./places.html" class="card" style="text-decoration:none;margin:16px 0"><span class="date">導覽</span><span><strong>景點閱讀卡</strong><small>西安 × 敦煌｜12 個景點及延伸閱讀</small></span><span class="arrow">›</span></a>
   <div class="bar"><h2>六天行旅</h2><small id="progress"></small></div>
   <p>選一天，帶着問題出發。先收起手機觀察，再記下一個發現。</p>
