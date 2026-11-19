@@ -37,6 +37,108 @@ footer{margin-top:18px;font-size:13px}
 </style>
 </head>
 <body>
+  <!-- 絲路研學誌：1.6 秒開場 -->
+<style>
+#silkIntro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 65%, #285358, #193f45 65%);
+  color: #fff5e2;
+  text-align: center;
+  animation: silkExit .35s ease-in 1.25s forwards;
+}
+#silkIntro .silkWrap {
+  width: min(76vw, 330px);
+}
+#silkIntro .silkEdition {
+  color: #e4c59d;
+  font: 600 12px/1.5 system-ui, sans-serif;
+  letter-spacing: .16em;
+}
+#silkIntro .silkTitle {
+  margin: 12px 0 18px;
+  font: 700 clamp(36px, 9vw, 52px)/1.3 ui-serif, "Songti TC", serif;
+  letter-spacing: .08em;
+  animation: silkTitleIn .55s ease-out both;
+}
+#silkIntro svg {
+  display: block;
+  width: 100%;
+  height: 44px;
+}
+#silkIntro .silkLine {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: silkDraw .85s ease-in-out .12s forwards;
+}
+#silkIntro .silkCities {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+  color: #edd5b0;
+  font: 500 14px/1.5 system-ui, sans-serif;
+  letter-spacing: .12em;
+}
+@keyframes silkDraw { to { stroke-dashoffset: 0; } }
+@keyframes silkTitleIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes silkExit {
+  to { opacity: 0; visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #silkIntro { display: none; }
+}
+</style>
+
+<template id="silkIntroTemplate">
+  <div id="silkIntro" aria-hidden="true">
+    <div class="silkWrap">
+      <div class="silkEdition">歷史文化考察手記 · 2026</div>
+      <div class="silkTitle">絲路研學誌</div>
+      <svg viewBox="0 0 300 44" fill="none" aria-hidden="true">
+        <path class="silkLine" pathLength="1"
+          d="M12 31 C45 31 54 10 85 18 S128 37 156 23 S194 5 222 17 S257 30 288 12"
+          stroke="#e4b779" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="12" cy="31" r="4" fill="#f0d7b0"/>
+        <circle cx="288" cy="12" r="4" fill="#f0d7b0"/>
+      </svg>
+      <div class="silkCities"><span>西安</span><span>敦煌</span></div>
+    </div>
+  </div>
+</template>
+
+<script>
+(() => {
+  const key = "silkroad-intro-seen-v1";
+  const template = document.getElementById("silkIntroTemplate");
+
+  // 從景點卡返回指定日期時，直接去手記，不插播片頭。
+  if (new URLSearchParams(location.search).has("day")) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  try {
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+  } catch {
+    return; // 若不能記錄播放狀態，寧願略過，也不每次重播。
+  }
+
+  const intro = template.content.firstElementChild.cloneNode(true);
+  document.body.prepend(intro);
+  const remove = () => intro.remove();
+  intro.addEventListener("animationend", event => {
+    if (event.animationName === "silkExit") remove();
+  });
+  setTimeout(remove, 1800);
+})();
+</script>
+<!-- 開場結束；下方保留原有的 <main> -->
 <main>
 <header>
   <div class="eyebrow">西安 × 敦煌　｜　2026.12.18—12.23</div>
