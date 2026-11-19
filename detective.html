@@ -2,183 +2,273 @@
 <html lang="zh-HK">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#193f45">
-<title>兵馬俑密探｜雙機測試房</title>
+<title>兵馬俑密探｜絲路研學誌</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f6f2e9;color:#223639;font:17px/1.65 system-ui,sans-serif}
-main{max-width:620px;margin:auto;padding:18px}
-header,section{padding:20px;border-radius:16px;margin-bottom:14px}
-header{background:#193f45;color:#fff9ed}
-h1{font:700 32px/1.3 ui-serif,serif;margin:6px 0}
-h2{font-size:19px;margin:0 0 6px}
-p{margin:6px 0 12px}section{background:#fffdf8;border:1px solid #d8d2c5}
-button,input{font:inherit}
-button{padding:10px 15px;margin:5px 4px 5px 0;border:0;border-radius:10px;
-background:#205851;color:white;cursor:pointer}
-button:disabled{opacity:.55;cursor:default}
-input{width:100%;padding:10px;border:1px solid #899a96;border-radius:8px}
-small{display:block;color:#526462}
-#clue{border-left:3px solid #bd8253;padding:6px 12px}
+body{margin:0;background:#f5f0e6;color:#243536;font:17px/1.6 system-ui,sans-serif}
+main{max-width:650px;margin:auto;padding:16px 16px 44px}
+header,section{border-radius:17px;padding:19px;margin-bottom:13px}
+header{background:#193f45;color:#fff8e6}
+header small{color:#ead3ac;letter-spacing:.12em}
+h1{font:700 35px/1.25 ui-serif,serif;margin:8px 0}
+h2{font-size:20px;margin:0 0 7px} p{margin:6px 0 12px}
+section{background:#fffdf8;border:1px solid #d9d1c4}
+button,.button{display:inline-block;font:inherit;border:0;border-radius:10px;
+padding:10px 15px;background:#205851;color:white;margin:5px 3px 5px 0;cursor:pointer}
+button:disabled{opacity:.45}
+input,textarea{font:inherit;width:100%;padding:10px;border:1px solid #94a39b;
+border-radius:8px;background:white;color:#243536}
+input[type=file]{font-size:15px} textarea{min-height:80px}
+small{display:block;color:#546462}
+canvas,img{display:block;max-width:100%;height:auto;border-radius:10px;margin:10px auto}
+canvas{cursor:crosshair}
 [hidden]{display:none!important}
+#clue{border-left:4px solid #bd8253;padding:8px 12px;background:#f4ecdf}
+#err{color:#8b3527;white-space:pre-wrap}
+a{color:#205851}.secondary{background:#665b50}
 </style>
 </head>
-<body>
-<main>
-<header><div>絲路研學誌 ／ 雙機測試</div><h1>兵馬俑密探</h1>
-<p>一位出題，一位追查。這一局只傳一條文字線索。</p></header>
+<body><main>
+<header><small>絲路研學誌 ／ 秦始皇帝陵博物院</small>
+<h1>兵馬俑密探</h1>
+<p>同一排陶俑，你能只憑拍檔的線索認出那一尊嗎？</p></header>
 
 <section>
-  <h2 id="role">連線準備</h2>
-  <p id="msg" role="status">正在載入遊戲。若長時間沒有變化，請檢查網絡，再重新整理。</p>
+  <h2 id="role">雙人尋俑</h2>
+  <p id="stage" role="status">正在連線……</p>
   <small id="net"></small>
-  <button id="start" hidden>建立測試房</button>
+  <p id="err" role="alert"></p>
+  <button id="enter" hidden>建立遊戲房</button>
 </section>
 
-<section id="invitePanel" hidden>
-  <h2>邀請你的拍檔</h2>
-  <p>只把這條連結私下傳給乙，不要貼到班群。</p>
-  <input id="invite" readonly aria-label="拍檔邀請連結">
+<section id="inv" hidden>
+  <h2>邀請偵探</h2>
+  <p>只把本局連結傳給你的拍檔。</p>
+  <input id="url" readonly aria-label="本局邀請連結">
   <button id="copy">複製邀請連結</button>
-  <small id="copyMsg"></small>
+  <small id="copied"></small>
 </section>
 
-<section id="game" hidden>
-  <h2>本局線索</h2>
-  <p id="clue">暫時未有線索。</p>
-  <button id="send" hidden>傳送測試線索</button>
-  <button id="ack" hidden>我收到線索了</button>
+<section id="prepare" hidden>
+  <h2>① 秘密選俑</h2>
+  <p>在允許拍攝的位置，拍下你們都看得到的一排陶俑。避開遊人正面，遵從場館指示。</p>
+  <input id="file" type="file" accept="image/*" aria-label="拍攝或選取陶俑相片">
+  <small>選相後，點一下目標陶俑，把金圈放在它身上。未鎖定前可再點調整。</small>
+  <canvas id="preview" hidden></canvas>
+  <button id="lock" hidden>🔒 鎖定這尊陶俑</button>
 </section>
 
-<button id="closeRoom" hidden>結束並刪除測試房</button>
+<section id="compose" hidden>
+  <h2>② 給偵探一條線索</h2>
+  <label for="text">描述髮式、衣着、雙手或姿勢，不要直接說位置。</label>
+  <textarea id="text" maxlength="120"
+    placeholder="例如：留意雙手的位置；一隻手比另一隻高。"></textarea>
+  <button id="send">送出我的線索</button>
+</section>
+
+<section id="hunt" hidden>
+  <h2>本局線索</h2><p id="clue"></p>
+  <p id="guessHint" hidden>收起手機找一找。先在現場向拍檔指出你選的那一尊，再按下面的按鈕。</p>
+  <button id="pick" hidden>我已選定這尊俑</button>
+  <button id="reveal" hidden>揭曉鎖定相片</button>
+</section>
+
+<section id="result" hidden>
+  <h2>③ 揭曉：金圈裏的是哪一尊？</h2>
+  <p id="verified"></p>
+  <img id="answer" alt="出題人原先圈選的兵馬俑" hidden>
+  <small>對照你剛才指出的位置。哪個細節最能幫你分辨這尊俑？</small>
+</section>
+
+<button id="end" class="secondary" hidden>結束並刪除本局</button>
+<a id="again" class="button" href="./detective.html" hidden>開新一局</a>
 <p><a href="./index.html">← 返回絲路研學誌</a></p>
 </main>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
-import { getDatabase, ref, child, get, set, remove, onValue }
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+import {getAuth,signInAnonymously} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+import {getDatabase,ref,child,get,set,remove,onValue}
   from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
 
-const app = initializeApp({
-  apiKey: "AIzaSyDfdUGTlu05fmgqTZpjGED0mSubk0-b4Ew",
-  authDomain: "silkroad-detective.firebaseapp.com",
-  projectId: "silkroad-detective",
-  appId: "1:552417507719:web:95c13c686d3ba4a0b67b22",
-  databaseURL: "https://silkroad-detective-default-rtdb.asia-southeast1.firebasedatabase.app"
+const app=initializeApp({
+  apiKey:"AIzaSyDfdUGTlu05fmgqTZpjGED0mSubk0-b4Ew",
+  authDomain:"silkroad-detective.firebaseapp.com",
+  projectId:"silkroad-detective",
+  appId:"1:552417507719:web:95c13c686d3ba4a0b67b22",
+  databaseURL:"https://silkroad-detective-default-rtdb.asia-southeast1.firebasedatabase.app"
 });
-
-const db = getDatabase(app), auth = getAuth(app);
-const el = id => document.getElementById(id);
-const say = text => el("msg").textContent = text;
-const code = e => e?.code || e?.message || "未知錯誤";
-const incoming = location.hash.slice(1);
-const valid = /^[0-9a-f]{32}$/;
-let uid, room, host = false, online = false, stop = null;
-let busy = false, ended = false;
-
-function refreshButtons() {
-  for (const id of ["start","send","ack","closeRoom"])
-    el(id).disabled = busy || !online || ended;
+const db=getDatabase(app),auth=getAuth(app),$=id=>document.getElementById(id);
+const show=(id,yes)=>$(id).hidden=!yes;
+const cv=$("preview"),ctx=cv.getContext("2d");
+const base=document.createElement("canvas");
+let uid="",id=location.hash.slice(1),room=null,r=null,host=false;
+let online=false,busy=false,ended=false,stop=null,photo="",point=null;
+let checked="",seq=0,fileVersion=0;
+const key=()=>"silkroad-sealed-"+id;
+function stored(){try{return sessionStorage.getItem(key())||""}catch{return ""}}
+function forget(){try{sessionStorage.removeItem(key())}catch{}}
+function error(s){$("err").textContent=s}
+async function hash(s){
+  const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(bytes),x=>x.toString(16).padStart(2,"0")).join("");
 }
-
-function finish(text) {
-  ended = true;
-  if (stop) stop();
-  for (const id of ["start","invitePanel","game","closeRoom"])
-    el(id).hidden = true;
-  say(text);
+function controls(){
+  for(const b of ["enter","lock","send","pick","reveal","end"])
+    $(b).disabled=!online||busy||ended;
+  $("file").disabled=busy||!!r?.answerHash;
 }
-
-async function act(fn) {
-  if (busy || ended || !online) return;
-  busy = true; refreshButtons();
-  try { await fn(); }
-  catch (e) {
-    say("未能完成：" + code(e) +
-      "。如正在加入，房間可能已滿或已關閉。");
-  } finally {
-    busy = false; refreshButtons();
-  }
+function finish(s){
+  ended=true;seq++;fileVersion++;if(stop)stop();forget();photo="";point=null;
+  cv.width=base.width=0;$("file").value="";$("answer").removeAttribute("src");
+  for(const k of ["enter","inv","prepare","compose","hunt","result","end"])show(k,false);
+  $("stage").textContent=s;show("again",true);
 }
-
-function watchRoom(id) {
-  history.replaceState(null,"","#" + id);
-  el("start").hidden = true;
-  el("role").textContent = host ? "甲｜出題人" : "乙｜偵探";
-  el("game").hidden = false;
-  el("closeRoom").hidden = !host;
-  el("invite").value = location.href;
-  stop = onValue(room, snap => {
-    const r = snap.val();
-    if (!r) { finish("這間測試房已結束。"); return; }
-    el("invitePanel").hidden = !host || !!r.guest;
-    el("send").hidden = !host || !r.guest || !!r.clue;
-    el("ack").hidden = host || !r.clue || !!r.received;
-    el("clue").textContent = r.clue || "暫時未有線索。";
-    if (r.received) say(host ? "✓ 拍檔已按「收到」，雙機來回測試成功！" :
-                                  "✓ 你已按「收到」，請甲查看自己的畫面。");
-    else if (r.clue) say(host ? "線索已顯示，等待拍檔確認。" : "收到線索，請按下面的確認按鈕。");
-    else if (r.guest) say(host ? "拍檔已加入，可以傳送線索。" : "已加入，等待甲傳送線索。");
-    else say("測試房已建立，請把邀請連結傳給乙。");
-    refreshButtons();
-  }, e => finish("房間已關閉或無法再讀取：" + code(e)));
+async function run(fn){
+  if(busy||ended||!online)return;
+  busy=true;error("");controls();
+  try{await fn()}catch(e){
+    const msg=String(e.code||e.message||e);
+    error(/permission.denied/i.test(msg)
+      ?"操作未獲批准：房間可能已滿、已關閉，或相片規則尚未發布。"
+      :"未能完成："+msg);
+  }finally{busy=false;controls()}
 }
-
-el("copy").onclick = async () => {
-  try {
-    await navigator.clipboard.writeText(el("invite").value);
-    el("copyMsg").textContent = "已複製，可以私下傳給拍檔。";
-  } catch {
-    el("invite").select();
-    el("copyMsg").textContent = "請長按上面的網址，選「複製」。";
-  }
+function draw(){
+  ctx.drawImage(base,0,0);
+  if(!point)return;
+  const radius=Math.max(14,Math.min(cv.width,cv.height)*.085);
+  ctx.beginPath();ctx.arc(point.x,point.y,radius,0,2*Math.PI);
+  ctx.strokeStyle="#442c18";ctx.lineWidth=Math.max(5,radius*.13);ctx.stroke();
+  ctx.strokeStyle="#ffd44f";ctx.lineWidth=Math.max(3,radius*.075);ctx.stroke();
+}
+$("file").onchange=async()=>{
+  const v=++fileVersion,f=$("file").files[0];
+  point=null;show("preview",false);show("lock",false);error("");
+  if(!f)return;
+  const u=URL.createObjectURL(f);
+  try{
+    const im=new Image();im.src=u;await im.decode();
+    if(v!==fileVersion||ended)return;
+    const scale=Math.min(1,960/Math.max(im.naturalWidth,im.naturalHeight));
+    cv.width=base.width=Math.max(1,Math.round(im.naturalWidth*scale));
+    cv.height=base.height=Math.max(1,Math.round(im.naturalHeight*scale));
+    base.getContext("2d").drawImage(im,0,0,base.width,base.height);
+    draw();show("preview",true);
+  }catch{error("未能讀取相片，請重拍或選一張 JPEG 相片。")}
+  finally{URL.revokeObjectURL(u)}
 };
-
-el("start").onclick = () => act(async () => {
-  const id = incoming || crypto.randomUUID().replaceAll("-","");
-  room = ref(db,"testRooms/" + id);
-  if (!incoming) {
-    await set(child(room,"host"),uid);
-    host = true;
-  } else {
-    // 已是成員可重開；新來者只嘗試佔用自己的偵探席。
-    let existing = null;
-    try { existing = (await get(room)).val(); } catch {}
-    if (existing?.host === uid) host = true;
-    else if (existing?.guest !== uid) await set(child(room,"guest"),uid);
+cv.onclick=e=>{
+  if(busy||r?.answerHash)return;
+  const b=cv.getBoundingClientRect();
+  point={x:(e.clientX-b.left)*cv.width/b.width,y:(e.clientY-b.top)*cv.height/b.height};
+  draw();show("lock",true);
+};
+function jpeg(){
+  const out=document.createElement("canvas");
+  for(const scale of [1,.8,.6,.45,.3]){
+    out.width=Math.max(1,Math.round(cv.width*scale));
+    out.height=Math.max(1,Math.round(cv.height*scale));
+    out.getContext("2d").drawImage(cv,0,0,out.width,out.height);
+    const s=out.toDataURL("image/jpeg",.72);
+    if(s.startsWith("data:image/jpeg;base64,")&&s.length<=180000)return s;
   }
-  watchRoom(id);
-});
-el("send").onclick = () => act(() =>
-  set(child(room,"clue"),"請找一件有四隻腳、但不會自己行走的課室物件。"));
-el("ack").onclick = () => act(() => set(child(room,"received"),true));
-el("closeRoom").onclick = () => act(async () => {
-  if (!confirm("確定結束並刪除這間測試房？")) return;
-  await remove(room);
-  finish("測試房已刪除。你可以返回絲路研學誌。");
-});
-
-try {
-  if (incoming && !valid.test(incoming)) throw Error("邀請連結不完整");
-  await auth.authStateReady();
-  uid = (auth.currentUser || (await signInAnonymously(auth)).user).uid;
-  el("start").textContent = incoming ? "加入／重返這間房" : "建立測試房";
-  el("start").hidden = false;
-  say(incoming ? "已收到邀請。連線後，按下方按鈕加入。" :
-                 "準備好了。請甲建立測試房，乙稍後使用邀請連結。");
-  refreshButtons();
-  onValue(ref(db,".info/connected"), snap => {
-    online = snap.val() === true;
-    el("net").textContent = online ? "● 已連上即時資料庫" :
-      "○ 未連上即時資料庫；請保持連線，暫時不要關閉頁面。";
-    refreshButtons();
-  });
-} catch (e) {
-  say("未能開始：" + code(e) + "。請記下這個錯誤提示。");
+  throw Error("相片太大，請換一張。");
 }
-</script>
-</body>
-</html>
+async function verify(image,expected){
+  const n=++seq;
+  show("answer",false);$("verified").textContent="正在核對鎖定時的相片指紋……";
+  let valid=false;
+  try{valid=image.startsWith("data:image/jpeg;base64,")&&await hash(image)===expected}catch{}
+  if(n!==seq||ended)return;
+  if(!valid){$("verified").textContent="相片與原先鎖定的答案不符，不顯示。";return}
+  $("answer").src=image;show("answer",true);
+  $("verified").textContent="✓ 相片與出題時鎖定的答案一致。";
+}
+function render(snap){
+  r=snap.val();if(!r){finish("這一局已結束。");return}
+  const locked=!!r.answerHash,done=!!r.revealedPhoto;
+  $("role").textContent=host?"甲｜出題人":"乙｜偵探";
+  show("enter",false);show("end",host);show("inv",host&&!r.guest);
+  show("prepare",host&&!locked);show("compose",host&&locked&&!!r.guest&&!r.clue);
+  show("hunt",!!r.clue);$("clue").textContent=r.clue||"";
+  show("guessHint",!host&&!!r.clue&&!r.selected);
+  show("pick",!host&&locked&&!!r.clue&&!r.selected);
+  show("reveal",host&&!!r.selected&&!done);show("result",done);
+  $("stage").textContent=done?"答案已揭曉。玩完請由甲刪除本局。":
+    r.selected?(host?"偵探已選定，現在可以揭曉。":"你已選定，等待出題人揭曉。"):
+    r.clue?(host?"線索已送出。請讓拍檔在現場指出一尊陶俑。":"線索到了！在現場找出你的答案。"):
+    !locked?(host?"請秘密拍照，圈出目標並鎖定。":"拍檔正在選俑，答案暫時保密。"):
+    !r.guest?"答案已鎖定，請把邀請連結傳給拍檔。":
+    host?"答案已鎖定，請輸入你自己的觀察線索。":"答案已鎖定，等候拍檔的線索。";
+  if(host&&locked&&!done&&!photo&&!stored())
+    error("這個分頁找不到鎖定的原相。請結束本局再開房，不要更換答案。");
+  if(done&&checked!==r.revealedPhoto){
+    checked=r.revealedPhoto;verify(r.revealedPhoto,r.answerHash);
+  }
+  controls();
+}
+$("enter").onclick=()=>run(async()=>{
+  if(!id){
+    const fresh=crypto.randomUUID().replaceAll("-","");
+    const dest=ref(db,"testRooms/"+fresh);
+    await set(child(dest,"host"),uid);id=fresh;room=dest;host=true;
+  }else{
+    room=ref(db,"testRooms/"+id);
+    let existing;
+    try{existing=(await get(room)).val()}catch{}
+    host=existing?.host===uid;
+    if(!host&&existing?.guest!==uid)await set(child(room,"guest"),uid);
+  }
+  history.replaceState(null,"","#"+id);$("url").value=location.href;
+  if(host)photo=stored();
+  stop=onValue(room,render,()=>finish("這間房已關閉，或你沒有讀取權限。"));
+});
+$("copy").onclick=async()=>{
+  try{await navigator.clipboard.writeText($("url").value);
+    $("copied").textContent="已複製，只傳給本局拍檔。"}
+  catch{$("url").select();$("copied").textContent="請長按網址，選「複製」。"}
+};
+$("lock").onclick=()=>run(async()=>{
+  if(!point)throw Error("請先點相圈出目標。");
+  photo=jpeg();
+  try{sessionStorage.setItem(key(),photo)}catch{}
+  await set(child(room,"answerHash"),await hash(photo));
+});
+$("send").onclick=()=>run(async()=>{
+  const clue=$("text").value.trim();
+  if(!clue||clue.length>120)throw Error("請輸入 1 至 120 字線索。");
+  await set(child(room,"clue"),clue);
+});
+$("pick").onclick=()=>run(async()=>{
+  if(confirm("你已在現場指出答案？確認後便不能改選。"))
+    await set(child(room,"selected"),true);
+});
+$("reveal").onclick=()=>run(async()=>{
+  const s=photo||stored();
+  if(!s||await hash(s)!==r.answerHash)throw Error("找不到原先鎖定的相片，請結束本局再開房。");
+  await set(child(room,"revealedPhoto"),s);
+});
+$("end").onclick=()=>run(async()=>{
+  if(!confirm("刪除本局房間、線索和已上傳的相片？"))return;
+  if(stop){stop();stop=null}
+  try{await remove(room);finish("本局已刪除。交換角色後，由新出題人開房。")}
+  catch(e){stop=onValue(room,render,()=>finish("房間已關閉。"));throw e}
+});
+try{
+  if(id&&!/^[a-f0-9]{32}$/.test(id))throw Error("邀請連結不完整。");
+  await auth.authStateReady();
+  uid=(auth.currentUser||(await signInAnonymously(auth)).user).uid;
+  $("enter").textContent=id?"加入／返回這間遊戲房":"我是出題人｜開房";
+  $("stage").textContent=id?"已收到本局邀請，請按下方按鈕。":"兩人站在同一個可觀察陶俑的位置，再由一人開房。";
+  show("enter",true);controls();
+  onValue(ref(db,".info/connected"),s=>{
+    online=s.val()===true;
+    $("net").textContent=online?"● 已連線":"○ 等候網絡；未完成的傳送請等候確認。";
+    controls();
+  });
+}catch(e){error("無法進入："+String(e.code||e.message))}
+</script></body></html>
