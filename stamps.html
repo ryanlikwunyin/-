@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#193f45">
+<title>絲路印記護照｜絲路研學誌</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0e6;color:#263737;font:17px/1.65 system-ui,sans-serif}
+main{max-width:680px;margin:auto;padding:16px 16px 48px}
+a{color:#205851}
+.back{display:inline-block;margin:4px 0 14px;text-decoration:none;font-weight:650}
+header{background:#193f45;color:#fff8e8;padding:24px;border-radius:18px}
+header small{color:#e5c89f;letter-spacing:.12em}
+h1,h2,.seal{font-family:ui-serif,"Songti TC",serif}
+h1{font-size:34px;line-height:1.3;margin:8px 0}
+h2{font-size:23px;margin:0 0 6px}
+p{margin:6px 0 12px}
+.progress{margin:19px 0 12px;font-weight:650}
+.track{height:7px;background:#dfd8c9;border-radius:9px;margin:7px 0}
+.fill{height:100%;background:#a34432;border-radius:9px;transition:width .35s}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{background:#fffcf5;border:1px solid #d7cfbf;border-radius:15px;
+padding:14px 10px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.card small{color:#586866;font-size:13px}
+.seal{height:74px;width:74px;display:grid;place-items:center;margin:12px auto;
+border:2px dashed #bcb4a5;border-radius:16px;color:#817b70;
+font-weight:800;font-size:26px;line-height:1;background:#f5f1e8}
+.won .seal{color:#9b3427;border:4px double #a23f30;background:#fff4e8;
+transform:rotate(-5deg);box-shadow:inset 0 0 0 2px #fff4e8}
+.card:nth-child(even).won .seal{transform:rotate(4deg)}
+.card strong{display:block;font-size:17px}
+.card .meaning{font-size:14px;line-height:1.5;color:#52615c;margin:5px 0 12px}
+.card .foot{margin-top:auto}
+button,.link{font:inherit;font-size:15px;font-weight:650;border:0;border-radius:9px;
+padding:9px 12px;display:inline-block;text-decoration:none;cursor:pointer}
+button{background:#91402e;color:white}
+.link{background:#e6eee9;color:#205851}
+.earned{color:#923d2b;font-weight:700;font-size:15px}
+#letter,.moment{margin:16px 0;background:#fff9e9;border:1px solid #c6a877;
+border-radius:15px;padding:18px}
+#letter{border-top:5px solid #963e2e}
+blockquote{margin:12px 0;border-left:3px solid #ac7850;padding-left:14px;color:#654535;white-space:pre-wrap;overflow-wrap:anywhere}
+.signature{text-align:right;color:#714735}
+footer{margin-top:18px;color:#586866;font-size:13px}
+[hidden]{display:none!important}
+@keyframes land{0%{scale:1.3;opacity:.25}70%{scale:.93}100%{scale:1}}
+@media(prefers-reduced-motion:no-preference){.fresh .seal{animation:land .38s ease-out}}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="./index.html">← 返回絲路研學誌</a>
+<header>
+  <small>西安 × 敦煌　／　考察紀念護照</small>
+  <h1>絲路印記護照</h1>
+  <p>一枚章，留住一個你親眼看見的細節。</p>
+  <small>每天寫下手記後，回來親手蓋章。</small>
+</header>
+
+<div class="progress">
+  <span id="count"></span>
+  <div class="track"><div id="fill" class="fill"></div></div>
+</div>
+
+<section class="grid" id="grid" aria-label="六枚考察印章"></section>
+
+<div class="moment" id="moment" role="status" hidden></div>
+
+<section id="letter" hidden>
+  <small>六印集齊　／　給旅途中的你</small>
+  <h2>你帶走的，不只是六枚印章</h2>
+  <p>第一晚站在西安街頭時，也許最吸引你的是眼前的燈光。六天後，如果一位師弟妹站在你旁邊，你會不會請他多停一會，看一尊陶俑的手、一幅壁畫裏人物的目光，或一張展品標籤上不起眼的字？</p>
+  <div id="firstMemory" hidden>
+    <b>翻回第一頁，這是你當時寫下的話：</b>
+    <blockquote id="quote"></blockquote>
+  </div>
+  <p>謝謝你願意把自己的觀察留下來。不是每個問題都要在旅程結束前找到答案；有些問題，值得帶回香港慢慢想。</p>
+  <p><b>願你回到熟悉的街道，仍願意為一個不熟悉的細節停下腳步。</b></p>
+  <p class="signature">—— 給完成絲路考察的你</p>
+</section>
+
+<footer>印章與手記只保存在目前的裝置及瀏覽器，不會自動提交給老師。集齊後可以截圖保存護照。</footer>
+</main>
+
+<script>
+(() => {
+  const NOTES = "silkroad-fieldnotes-2026-v1";
+  const STAMPS = "silkroad-passport-2026-v1";
+  const days = [
+    ["12/18","西安","鼓樓","古城初見","把「我看見」和「我想到」分開。",
+     "你為旅程留下了第一個觀察。別急着把它寫得完美，六天後回來讀，它就是最珍貴的起點。"],
+    ["12/19","西安","秦俑","俑陣尋微","在人群般的俑陣中，看見一個不同。",
+     "今天你沒有只用「壯觀」概括一切。當你能指出一個別人也找得到的細節，你就成了同伴的眼睛。"],
+    ["12/20","敦煌","關城","關外行旅","換到古代旅人的位置看地貌。",
+     "同一段路，對坐車的你和步行的旅人並不一樣。願你以後遇見不同想法，也先問：對方站在哪裏？"],
+    ["12/21","敦煌","飛天","守護一瞬","記住一個畫面，也想想誰守護它。",
+     "你今天看見的顏色，背後有許多沒有留下名字的守護者。欣賞一件文物，也可以由尊重一條參觀規則開始。"],
+    ["12/22","敦煌","絲路","展品追問","讓一件展品帶出一條自己的問題。",
+     "一句真心的「我還想知道」，比抄下一整塊展板更像研究的開始。把你的問題留下來。"],
+    ["12/23","西安","芙蓉","少年導賞","選一個值得停步的地方，介紹給別人。",
+     "從跟着導賞走，到能告訴別人在哪裏停下來，你已經有了自己的觀看路線。"]
+  ];
+  const $ = id => document.getElementById(id);
+  let notes = [], won = [], readable = true;
+
+  function read(key){
+    const raw = localStorage.getItem(key);
+    if (raw === null) return [];
+    const value = JSON.parse(raw);
+    if (!Array.isArray(value)) throw Error("資料格式不符");
+    return value;
+  }
+  function load(){
+    try{
+      notes = read(NOTES);
+      won = read(STAMPS);
+      readable = true;
+    }catch{
+      readable = false;
+    }
+  }
+  function note(i){
+    return typeof notes[i] === "string" ? notes[i].trim() : "";
+  }
+  function node(tag,text,cls){
+    const n = document.createElement(tag);
+    n.textContent = text;
+    if(cls) n.className = cls;
+    return n;
+  }
+  function message(text){
+    $("moment").textContent = text;
+    $("moment").hidden = false;
+  }
+  function earn(i){
+    load();
+    if(!readable){ message("未能讀取這部裝置的記錄，沒有改動原有資料。");return; }
+    if(!note(i)){ render();message("請先寫下當天手記，再回來蓋章。");return; }
+    if(won[i] === true){ render();return; }
+    const next = days.map((_,n) => n === i || won[n] === true);
+    try{ localStorage.setItem(STAMPS,JSON.stringify(next)); }
+    catch{ message("今次未能儲存印章，請確認瀏覽器允許儲存，再試一次。");return; }
+    won = next;
+    render(i);
+    message("已蓋上「" + days[i][2] + "」章。 " + days[i][5]);
+    const all = next.every(Boolean);
+    (all ? $("letter") : $("moment")).scrollIntoView({block:"center"});
+  }
+  function render(fresh = -1){
+    const grid = $("grid");
+    grid.replaceChildren();
+    if(!readable){
+      $("count").textContent = "未能讀取護照";
+      $("fill").style.width = "0";
+      $("letter").hidden = true;
+      message("請從平日寫手記的同一個 App 圖示或瀏覽器重開。不要清除資料。");
+      return;
+    }
+    const total = days.filter((_,i) => won[i] === true).length;
+    $("count").textContent = "我的收藏　" + total + " / 6 枚";
+    $("fill").style.width = (total/6*100) + "%";
+    days.forEach((d,i) => {
+      const earned = won[i] === true;
+      const card = node("article","","card" + (earned?" won":"") + (fresh===i?" fresh":""));
+      card.append(node("small",d[0]+" · "+d[1]),node("div",d[2],"seal"),
+        node("strong",d[3]),node("p",d[4],"meaning"));
+      const foot = node("div","","foot");
+      if(earned) foot.append(node("span","✓ 已收藏","earned"));
+      else if(note(i)){
+        const b = node("button","蓋上今日印章");
+        b.type = "button";
+        b.setAttribute("aria-label","蓋上"+d[2]+"印章");
+        b.onclick = () => earn(i);
+        foot.append(b);
+      }else{
+        const a = node("a","去寫手記 ›","link");
+        a.href = "./index.html?day=" + (i+1);
+        foot.append(a);
+      }
+      card.append(foot);grid.append(card);
+    });
+    $("letter").hidden = total !== 6;
+    const first = note(0);
+    $("firstMemory").hidden = total !== 6 || !first;
+    $("quote").textContent = first.length > 160 ? first.slice(0,160)+"……" : first;
+  }
+  function refresh(){ load();render(); }
+  refresh();
+  window.addEventListener("pageshow",refresh);
+  window.addEventListener("storage",e => {if(e.key===NOTES || e.key===STAMPS)refresh();});
+})();
+</script>
+</body>
+</html>
