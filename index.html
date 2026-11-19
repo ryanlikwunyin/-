@@ -130,56 +130,619 @@ footer{margin-top:18px;font-size:13px}
     return; // 若不能記錄播放狀態，寧願略過，也不每次重播。
   }
 
+  <!doctype html>
+<html lang="zh-HK">
+<head>
+  <link rel="apple-touch-icon" href="./IMG_1821.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#193f45">
+<meta name="apple-mobile-web-app-title" content="絲路研學誌">
+<title>省外行–絲綢之路沿線城市：敦煌、西安歷史文化及藝術探索之旅</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f2e9;color:#223639;font:17px/1.65 system-ui,sans-serif}
+main{max-width:680px;margin:auto;padding:16px 16px 48px}
+header{position:relative;overflow:hidden;background:#193f45;color:#fff9ea;border-radius:20px;padding:24px 22px 54px}
+header svg{position:absolute;bottom:0;left:0;width:100%;height:42px}
+.eyebrow{font-size:13px;letter-spacing:.1em;font-weight:650}
+h1,h2{font-family:ui-serif,"Songti TC",serif;line-height:1.3}
+h1{font-size:38px;margin:10px 0}
+h2{font-size:26px;margin:8px 0}
+h3{font-size:18px;margin:20px 0 4px}
+p{margin:4px 0 12px}
+header p{max-width:30em;margin:0}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:20px}
+small,footer{color:#506366}
+button,textarea{font:inherit}
+button{cursor:pointer}
+.card,article{background:#fffdf8;border:1px solid #d9d4c7;border-radius:14px}
+.card{width:100%;display:flex;align-items:center;gap:16px;text-align:left;padding:14px;color:inherit;margin:0 0 9px}
+.card strong,.card small{display:block}
+.date{color:#8c432b;font-weight:700;white-space:nowrap}
+.arrow{margin-left:auto;color:#8c432b}
+article{padding:20px;margin-top:12px}
+.action{background:#193f45;color:white;border:0;border-radius:10px;padding:10px 15px;margin-top:12px}
+textarea{width:100%;min-height:140px;padding:12px;border:1px solid #859692;border-radius:9px;background:white;color:inherit;margin-top:6px}
+#status{display:block;min-height:26px}
+footer{margin-top:18px;font-size:13px}
+</style>
+</head>
+<body>
+  <!-- 絲路研學誌：1.6 秒開場 -->
+<style>
+#silkIntro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 65%, #285358, #193f45 65%);
+  color: #fff5e2;
+  text-align: center;
+  animation: silkExit .35s ease-in 1.25s forwards;
+}
+#silkIntro .silkWrap {
+  width: min(76vw, 330px);
+}
+#silkIntro .silkEdition {
+  color: #e4c59d;
+  font: 600 12px/1.5 system-ui, sans-serif;
+  letter-spacing: .16em;
+}
+#silkIntro .silkTitle {
+  margin: 12px 0 18px;
+  font: 700 clamp(36px, 9vw, 52px)/1.3 ui-serif, "Songti TC", serif;
+  letter-spacing: .08em;
+  animation: silkTitleIn .55s ease-out both;
+}
+#silkIntro svg {
+  display: block;
+  width: 100%;
+  height: 44px;
+}
+#silkIntro .silkLine {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: silkDraw .85s ease-in-out .12s forwards;
+}
+#silkIntro .silkCities {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+  color: #edd5b0;
+  font: 500 14px/1.5 system-ui, sans-serif;
+  letter-spacing: .12em;
+}
+@keyframes silkDraw { to { stroke-dashoffset: 0; } }
+@keyframes silkTitleIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes silkExit {
+  to { opacity: 0; visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #silkIntro { display: none; }
+}
+</style>
+
+<template id="silkIntroTemplate">
+  <div id="silkIntro" aria-hidden="true">
+    <div class="silkWrap">
+      <div class="silkEdition">歷史文化考察手記 · 2026</div>
+      <div class="silkTitle">絲路研學誌</div>
+      <svg viewBox="0 0 300 44" fill="none" aria-hidden="true">
+        <path class="silkLine" pathLength="1"
+          d="M12 31 C45 31 54 10 85 18 S128 37 156 23 S194 5 222 17 S257 30 288 12"
+          stroke="#e4b779" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="12" cy="31" r="4" fill="#f0d7b0"/>
+        <circle cx="288" cy="12" r="4" fill="#f0d7b0"/>
+      </svg>
+      <div class="silkCities"><span>西安</span><span>敦煌</span></div>
+    </div>
+  </div>
+</template>
+
+<script>
+(() => {
+  const key = "silkroad-intro-seen-v1";
+  const template = document.getElementById("silkIntroTemplate");
+
+  // 從景點卡返回指定日期時，直接去手記，不插播片頭。
+  if (new URLSearchParams(location.search).has("day")) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  try {
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+  } catch {
+    return; // 若不能記錄播放狀態，寧願略過，也不每次重播。
+  }
   const intro = template.content.firstElementChild.cloneNode(true);
-  document.body.prepend(intro);
-  const remove = () => intro.remove();
-  intro.addEventListener("animationend", event => {
-    if (event.animationName === "silkExit") remove();
-  });
-    // 新版片頭：展示 2.2 秒，淡出 0.4 秒，共 2.6 秒。
-  intro.style.animation = "silkExit .4s ease-in 2.2s forwards";
+
+  // 片頭完整停留 3 秒，之後用 0.4 秒淡出。
+  intro.style.animation = "silkExit .4s ease-in 3s forwards";
   intro.style.background =
-    "radial-gradient(ellipse at 68% 28%, #345954 0%, #193f45 52%, #112e33 100%)";
+    "radial-gradient(ellipse at 65% 30%, #345953, #193f45 55%, #112e33)";
 
+  // 校名置頂，不會隨中央標題的位置移動。
+  const school = document.createElement("div");
+  school.style.cssText = `
+    position:absolute;
+    top:calc(env(safe-area-inset-top, 0px) + clamp(14px, 4vh, 38px));
+    left:12px; right:12px; text-align:center; z-index:2;
+  `;
+  school.innerHTML = `
+    <div style="color:#fff5e3;font:650 clamp(18px,5vw,24px)/1.45 ui-serif,'Songti TC',serif;
+                letter-spacing:.07em">順德聯誼總會胡兆熾中學</div>
+    <div style="margin-top:3px;color:#e9cea0;font:500 14px/1.5 system-ui,sans-serif;
+                letter-spacing:.18em">校外事務委員會</div>
+    <div style="width:48px;height:1px;margin:10px auto 0;
+                background:linear-gradient(90deg,transparent,#d7ae72,transparent)"></div>
+  `;
+  intro.prepend(school);
+
+  // 中央：絲路研學誌、西安至敦煌的路線。
   const wrap = intro.querySelector(".silkWrap");
-  wrap.style.cssText = "position:relative;z-index:1;width:min(84vw,350px)";
+  wrap.style.cssText = "position:relative;z-index:1;width:min(80vw,350px)";
+  wrap.querySelector(".silkLine").style.animationDuration = "1.15s";
 
-  // 保留原有絲路金線，抵達敦煌時讓終點亮起。
-  wrap.querySelector(".silkLine").style.animationDuration = "1.1s";
   const destination = wrap.querySelector("svg circle:last-of-type");
   if (destination && destination.animate) {
     destination.animate(
-      [{ opacity: 0.25 }, { opacity: 1 }],
-      { delay: 1220, duration: 320, easing: "ease-out", fill: "both" }
+      [{opacity:.2}, {opacity:1}],
+      {delay:1250, duration:350, easing:"ease-out", fill:"both"}
     );
   }
 
-  // 底部沙丘：直接繪製，不用另外下載圖片。
-  intro.insertAdjacentHTML("afterbegin", `
+  // 底部沙丘直接繪製，不需要下載圖片。
+  intro.insertAdjacentHTML("beforeend", `
     <svg viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true"
-         style="position:absolute;bottom:0;left:0;width:100%;height:24%;pointer-events:none">
+         style="position:absolute;bottom:0;left:0;width:100%;height:22%;pointer-events:none">
       <path d="M0 66 Q62 76 138 40 T282 39 T400 24 V100 H0Z"
             fill="#dfbf89" opacity=".10"/>
       <path d="M0 83 Q65 52 138 65 T285 57 T400 51 V100 H0Z"
             fill="#d2a36a" opacity=".16"/>
       <path d="M0 83 Q65 52 138 65 T285 57 T400 51"
-            fill="none" stroke="#e9ca96" stroke-opacity=".5"
-            stroke-width="1" vector-effect="non-scaling-stroke"/>
+            fill="none" stroke="#e9ca96" stroke-opacity=".5"/>
     </svg>
   `);
 
-  // 校本署名：放在「西安／敦煌」下方，兩行同時顯示。
-  wrap.insertAdjacentHTML("beforeend", `
-    <div style="margin:24px auto 12px;width:58px;height:1px;
-                background:linear-gradient(90deg,transparent,#dbb77e,transparent)"></div>
-    <div style="color:#fff5e3;font:600 clamp(17px,4.5vw,20px)/1.6 ui-serif,'Songti TC',serif;
-                letter-spacing:.08em">順德聯誼總會胡兆熾中學</div>
-    <div style="margin-top:3px;color:#e8cfa7;font:500 14px/1.6 system-ui,sans-serif;
-                letter-spacing:.16em">校外事務委員會</div>
-  `);
+  const remove = () => intro.remove();
+  intro.addEventListener("animationend", event => {
+    if (event.target === intro && event.animationName === "silkExit") remove();
+  });
+  document.body.prepend(intro);
+  setTimeout(remove, 3600);
+})();
+</script>
+<!-- 開場結束；下方保留原有的 <main> -->
+<main>
+<header>
+  <div class="eyebrow">西安 × 敦煌　｜　2026.12.18—12.23</div>
+  <h1>絲路研學誌</h1>
+  <p>省外行–絲綢之路沿線城市：敦煌、西安歷史文化及藝術探索之旅</p>
+  <svg viewBox="0 0 600 42" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 35 Q95 -12 200 22 T410 17 T600 20 V42 H0Z" fill="#c89466"/>
+    <path d="M0 40 Q100 15 190 32 T400 28 T600 24 V42 H0Z" fill="#ead2ac"/>
+  </svg>
+</header>
 
-  // 正常在 2.6 秒淡出；若瀏覽器沒有送出動畫結束事件，仍會自動移除。
-  setTimeout(remove, 3000);
+<section id="home">
+  <div style="margin:16px 0">
+  <button type="button" class="action" id="packButton">
+    ↓ 下載離線考察包
+  </button>
+  <small id="packStatus" role="status" style="display:block;margin-top:6px">
+    出發前連上 Wi-Fi，儲存六天習作及 12 張景點卡。外部網站不包括在內。
+  </small>
+</div>
+
+<script>
+(() => {
+  const button = document.getElementById("packButton");
+  const status = document.getElementById("packStatus");
+  const cacheName = "silkroad-journal-offline-v1";
+  const pages = ["./index.html", "./places.html"].map(
+    path => new URL(path, location.href).href
+  );
+
+  if (!("serviceWorker" in navigator) || !("caches" in window)) {
+    button.disabled = true;
+    status.textContent = "此瀏覽器未能使用離線包，請在 Safari 打開學生首頁再試。";
+    return;
+  }
+
+  async function hasBothPages() {
+    const results = await Promise.all(
+      pages.map(url => caches.match(url, { cacheName }))
+    );
+    return results.every(response => response && response.ok);
+  }
+
+  function showReady() {
+    button.textContent = "重新下載離線考察包";
+    status.textContent = "✓ 已備妥六天習作及 12 張景點卡。香港外部連結仍需網絡。";
+  }
+
+  // 再次打開首頁時，檢查這部裝置是否仍保有兩頁。
+  if (navigator.serviceWorker.controller) {
+    hasBothPages().then(ok => {
+      if (ok && !button.disabled) showReady();
+    }).catch(() => {});
+  }
+
+  button.onclick = async () => {
+    button.disabled = true;
+    status.textContent = "正在下載，請保持連線，暫時不要關閉此頁……";
+    let timer;
+    try {
+      await Promise.race([
+        (async () => {
+          await navigator.serviceWorker.register("./sw.js");
+          await navigator.serviceWorker.ready;
+          const cache = await caches.open(cacheName);
+          await cache.addAll(pages.map(url => new Request(url, { cache: "reload" })));
+          if (!(await hasBothPages())) throw new Error("未完整下載");
+        })(),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error("逾時")), 45000);
+        })
+      ]);
+      showReady();
+    } catch {
+      status.textContent = "未能確認下載完成。請保持連線，稍後再按一次；原有手記不受影響。";
+    } finally {
+      clearTimeout(timer);
+      button.disabled = false;
+    }
+  };
+})();
+</script>
+  <a href="./places.html" class="card" style="text-decoration:none;margin:16px 0"><span class="date">導覽</span><span><strong>景點閱讀卡</strong><small>西安 × 敦煌｜12 個景點及延伸閱讀</small></span><span class="arrow">›</span></a><a href="./detective.html" class="card" style="text-decoration:none;margin:0 0 16px"><span class="date">遊戲</span><span><strong>兵馬俑密探</strong><small>雙人連線｜拍照圈俑、交換線索、揭曉答案</small></span><span class="arrow">›</span></a><a href="./stamps.html" class="card" style="text-decoration:none;margin:0 0 16px"><span class="date">護照</span><span><strong>絲路印記護照</strong><small>收集六枚考察印章，解鎖一封寫給你的信</small></span><span class="arrow">›</span></a><a href="./booklet.html" class="card" style="text-decoration:none;margin:0 0 16px"><span class="date">展覽</span><span><strong>一景一聲｜我的有聲作品集</strong><small>把六天的照片、聲音和手記，變成一份可帶走的作品</small></span><span class="arrow">›</span></a>
+  <div class="bar"><h2>六天行旅</h2><small id="progress"></small></div>
+  <p>選一天，帶着問題出發。先收起手機觀察，再記下一個發現。</p>
+  <div id="cards"></div>
+  <button class="action" id="export">匯出我的六天手記</button>
+</section>
+
+<section id="detail" hidden>
+  <button class="action" id="back">← 返回六天行旅</button>
+  <article>
+    <div class="eyebrow date" id="day"></div>
+    <h2 id="heading"></h2>
+    <small id="places"></small>
+    <h3>出發前讀一讀</h3><p id="reading"></p>
+    <h3>現場小任務</h3><p id="task"></p>
+    <label for="note"><b>我的考察手記</b></label>
+    <textarea id="note" placeholder="我留意到……"></textarea>
+    <small id="status" role="status"></small>
+  </article>
+</section>
+
+<footer>行程以當日實際安排為準。筆記只存於這個瀏覽器，不會傳送給老師。建議每天匯出備份。</footer>
+</main>
+<script>
+const days = [
+  ["西安","古城怎樣說故事？","西安鼓樓・大唐不夜城",
+   "鼓樓曾以鼓聲報時。今天的大唐不夜城則透過燈光、街景和演出呈現人們對盛唐的想像。眼前的景象，哪些是你看見的，哪些是你聯想到的？",
+   "選一個細節，寫兩句：「我實際看見……」「這使我想到……」。讓沒到場的同學也能分辨觀察和聯想。"],
+  ["西安","一張陶俑尋人卡","院校教育交流・秦始皇帝陵博物院・文化體驗",
+   "先看整個俑陣，再選定一尊陶俑。髮式、衣着和姿勢是同學可以核對的線索；「很威武」則是觀賞者的感受。",
+   "不透露陶俑的位置，用三個可見細節寫一張尋人卡。請同學猜猜你描述的是哪一尊。"],
+  ["敦煌","給關外旅人的提醒","陽關遺址及博物館・玉門關遺址・敦煌雅丹國家地質公園",
+   "關隘是古代交通的重要節點。今天乘車經過的路面和地形，對步行或隨駝隊出行的人，可能意味着不同的困難。",
+   "如果只能給古代旅人一項提醒，你會說甚麼？用今天親眼見到的一個地形特徵，解釋你的建議。"],
+  ["敦煌","留住一幅畫","鳴沙山月牙泉・莫高窟・敦煌石窟文物保護研究陳列中心・沙洲夜市",
+   "欣賞壁畫時，可以只留意一個人物動作、一條衣帶或一種顏色。到了保護展覽，再想想：要讓後人也能看見這個細節，保護人員要處理甚麼問題？",
+   "遵守場館規定，洞窟內不用手機。離開後憑記憶描述一個畫面，再根據導賞或展板寫下一項保護措施。"],
+  ["敦煌","跟着一件展品追問","敦煌市博物館・絲綢之路與「一帶一路」專題講座",
+   "沿絲路流動的不只是貨物。人們也帶着圖案、技藝和習俗遠行。讀展品說明時，留意甚麼是有記載的資料，甚麼是你自己的推測。",
+   "寫下一件展品的名稱和一個細節。試用講座中的一個觀點解讀它；若未能連起來，寫一條想問講者的問題。"],
+  ["西安","今天由我導賞","大唐芙蓉園",
+   "園林以空間、建築和景觀呈現唐文化。回想第一晚在西安的觀察：經過六天考察，你現在會怎樣向別人介紹眼前的景象？",
+   "為下一屆同學寫約 50 字導賞。推薦一處值得停下來的地方，指出一個容易錯過的細節，並說明它為何值得看。"]
+];
+
+const el = id => document.getElementById(id);
+const key = "silkroad-fieldnotes-2026-v1";
+let current = 0, notes = Array(6).fill(""), storageOK = true;
+
+try {
+  const saved = JSON.parse(localStorage.getItem(key) || "null");
+  if (Array.isArray(saved))
+    notes = notes.map((_, i) => typeof saved[i] === "string" ? saved[i] : "");
+} catch { storageOK = false; }
+
+function showHome() {
+  el("home").hidden = false;
+  el("detail").hidden = true;
+  el("cards").replaceChildren();
+  el("progress").textContent = "已寫 " + notes.filter(s => s.trim()).length + " / 6 天";
+  days.forEach((d, i) => {
+    const b = document.createElement("button");
+    b.className = "card";
+    b.innerHTML = '<span class="date">12/' + (18+i) + '</span><span><strong>' +
+      d[1] + '</strong><small>' + d[0] + ' · ' +
+      (notes[i].trim() ? "已有筆記" : "待探索") +
+      '</small></span><span class="arrow">›</span>';
+    b.onclick = () => showDay(i);
+    el("cards").append(b);
+  });
+  window.scrollTo(0, 0);
+}
+function showDay(i) {
+  current = i;
+  const d = days[i];
+  el("home").hidden = true;
+  el("detail").hidden = false;
+  el("day").textContent = "第 " + (i+1) + " 天　｜　12 月 " + (18+i) + " 日　｜　" + d[0];
+  ["heading","places","reading","task"].forEach((id,n) => el(id).textContent = d[n+1]);
+  el("note").value = notes[i];
+  el("status").textContent = storageOK ? "輸入後會自動儲存在此瀏覽器。" : "未能確認本機儲存，離開前請匯出備份。";
+  window.scrollTo(0, 0);
+}
+el("note").oninput = () => {
+  notes[current] = el("note").value;
+  try {
+    localStorage.setItem(key, JSON.stringify(notes));
+    storageOK = true;
+    el("status").textContent = "✓ 已儲存在此瀏覽器，未提交給老師。";
+  } catch {
+    storageOK = false;
+    el("status").textContent = "未能儲存。請返回六天行旅並匯出備份。";
+  }
+};
+el("back").onclick = showHome;
+el("export").onclick = () => {
+  const text = document.title + "\n\n" + days.map((d,i) =>
+    "12/" + (18+i) + "　" + d[0] + "｜" + d[1] + "\n" +
+    d[4] + "\n我的筆記：" + (notes[i].trim() || "（未填寫）")
+  ).join("\n\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF",text], {type:"text/plain;charset=utf-8"}));
+  const a = document.createElement("a");
+  a.href = url; a.download = "絲路研學誌.txt";
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+};
+showHome();
+</script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const detail = $("detail"), label = $("day"), anchor = $("status");
+  if (!detail || !label || !anchor || $("sceneVoice")) return;
+
+  const box = document.createElement("section");
+  box.id = "sceneVoice";
+  box.innerHTML = `
+    <style>
+      #sceneVoice{border-top:1px solid #d8d0c0;margin-top:22px;padding-top:15px}
+      #sceneVoice h3{margin:0;color:#193f45;font-size:22px}
+      #sceneVoice .svrow{margin:16px 0}
+      #sceneVoice label,#sceneVoice b{display:block;margin-bottom:5px}
+      #sceneVoice input{font:inherit;max-width:100%}
+      #sceneVoice img{display:block;max-width:100%;max-height:340px;margin:10px auto;border-radius:12px}
+      #sceneVoice audio{width:100%;margin-top:8px}
+      #sceneVoice button,#sceneVoice a{display:inline-block;font:inherit;
+        margin:5px 5px 0 0;padding:8px 12px;border:0;border-radius:9px}
+      #sceneVoice button{background:#205851;color:white}
+      #sceneVoice button:disabled{opacity:.5}
+      #sceneVoice a{background:#e4eeea;color:#205851;text-decoration:none}
+      #sceneVoice #svDel{background:#f3e8df;color:#783c2c}
+      #sceneVoice small{display:block;margin-top:7px}
+      #sceneVoice [hidden]{display:none!important}
+    </style>
+    <h3>一景一聲</h3>
+    <p id="svPrompt"></p>
+    <div class="svrow">
+      <label for="svFile">一景｜拍照或從相簿選一張</label>
+      <input id="svFile" type="file" accept="image/*" disabled>
+      <img id="svImg" alt="我在這一天拍下的考察相片" hidden>
+      <a id="svSavePic" hidden>下載相片備份</a>
+    </div>
+    <div class="svrow">
+      <b>一聲｜錄下你想記住的一句話</b>
+      <button id="svRec" type="button" disabled>● 開始錄音</button>
+      <button id="svStop" type="button" hidden>■ 停止並儲存</button>
+      <audio id="svPlay" controls hidden></audio>
+      <a id="svSaveSound" hidden>下載錄音備份</a>
+    </div>
+    <p id="svMsg" role="status">正在讀取當天的記錄……</p>
+    <button id="svDel" type="button" hidden>刪除當天影音</button>
+    <small>只儲存在這部裝置，不等於已交功課。請定期下載備份。
+    只在允許拍攝的地方使用，錄下自己的聲音即可。</small>`;
+  anchor.after(box);
+
+  const prompts = [
+    "古城初見：哪個細節令你覺得「我已經來到西安」？",
+    "人物觀察：我最希望你留意照片中的……",
+    "走出關外：如果我是古代旅人，眼前的景象會令我……",
+    "敦煌一刻：有些細節不宜拍下，但我想用聲音記住……",
+    "展品追問：看過這件展品，我最想問的是……",
+    "回望旅程：如果把這張相寄給第一天的自己，我想說……"
+  ];
+  const micOK = !!(navigator.mediaDevices?.getUserMedia && window.MediaRecorder);
+  let db, day = -1, token = 0, busy = false, ready = false;
+  let recorder = null, timer = 0, photoURL = "", audioURL = "";
+  const say = s => $("svMsg").textContent = s;
+  const show = (id,on) => $(id).hidden = !on;
+
+  function controls() {
+    $("svFile").disabled = busy || !ready;
+    $("svRec").disabled = busy || !ready || !micOK;
+    $("svDel").disabled = busy || !ready;
+    const recording = recorder?.state === "recording";
+    show("svRec",!recording); show("svStop",recording);
+  }
+
+  function getDB() {
+    return new Promise((ok,no) => {
+      const q = indexedDB.open("silkroad-daily-media-2026",1);
+      q.onupgradeneeded = () => q.result.createObjectStore("media");
+      q.onsuccess = () => ok(q.result);
+      q.onerror = () => no(q.error);
+    });
+  }
+  function read(key) {
+    return new Promise((ok,no) => {
+      const q = db.transaction("media").objectStore("media").get(key);
+      q.onsuccess = () => ok(q.result);
+      q.onerror = () => no(q.error);
+    });
+  }
+  function save(d,kind,blob) {
+    return new Promise((ok,no) => {
+      const tx = db.transaction("media","readwrite");
+      tx.oncomplete = ok;
+      tx.onabort = tx.onerror = () => no(tx.error);
+      const store = tx.objectStore("media");
+      if(kind === "both"){
+        store.delete(d+":photo"); store.delete(d+":audio");
+      } else store.put(blob,d+":"+kind);
+    });
+  }
+  function clearView() {
+    $("svPlay").pause();
+    $("svPlay").removeAttribute("src"); $("svPlay").load();
+    $("svImg").removeAttribute("src");
+    if(photoURL) URL.revokeObjectURL(photoURL);
+    if(audioURL) URL.revokeObjectURL(audioURL);
+    photoURL = audioURL = "";
+    for(const id of ["svImg","svPlay","svSavePic","svSaveSound","svDel"]) show(id,false);
+  }
+
+  async function display(d,notice) {
+    const ticket = ++token;
+    clearView(); ready = false; controls();
+    if(d < 0) return;
+    $("svPrompt").textContent = prompts[d];
+    say("正在讀取……");
+    if(!db) return;
+    try {
+      const [p,a] = await Promise.all([read(d+":photo"),read(d+":audio")]);
+      if(ticket !== token) return;
+      const name = "一景一聲-12月"+(18+d)+"日";
+      if(p){
+        photoURL = URL.createObjectURL(p);
+        $("svImg").src = $("svSavePic").href = photoURL;
+        $("svSavePic").download = name+".jpg";
+        show("svImg",true); show("svSavePic",true);
+      }
+      if(a){
+        audioURL = URL.createObjectURL(a);
+        $("svPlay").src = $("svSaveSound").href = audioURL;
+        $("svSaveSound").download = name+
+          (a.type.includes("mp4")?".m4a":a.type.includes("ogg")?".ogg":".webm");
+        show("svPlay",true); show("svSaveSound",true);
+      }
+      show("svDel",!!(p||a));
+      $("svRec").textContent = a ? "● 重新錄音" : "● 開始錄音";
+      ready = true;
+      say((notice || (p&&a ? "✓ 當天的一景一聲已收藏。" :
+        p ? "✓ 相片已儲存，可以再錄一句話。" :
+        a ? "✓ 聲音已儲存，可以再加一張相。" : "今天的一景一聲仍是空白的。"))
+        + (micOK ? "" : " 此瀏覽器不支援直接錄音。"));
+    } catch { if(ticket===token) say("未能讀取本機記錄，請不要清除網站資料。"); }
+    controls();
+  }
+
+  // 從每天原有的「第 1 天」「第 2 天」標題辨認日期。
+  function syncDay() {
+    const match = label.textContent.match(/第\s*([1-6])\s*天/);
+    const next = !detail.hidden && match ? Number(match[1])-1 : -1;
+    if(next===day) return;
+    if(recorder?.state==="recording") recorder.stop();
+    day=next; display(day);
+  }
+  const observer = new MutationObserver(syncDay);
+  observer.observe(label,{childList:true,characterData:true,subtree:true});
+  observer.observe(detail,{attributes:true,attributeFilter:["hidden"]});
+  syncDay();
+  getDB().then(value=>{db=value;display(day)}).catch(()=>{
+    say("無法開啟本機影音儲存，請用平日開啟手記的 Safari 或主畫面圖示再試。");
+  });
+
+  async function makePhoto(file) {
+    const url = URL.createObjectURL(file);
+    try{
+      const img = new Image(); img.src=url; await img.decode();
+      const scale = Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight));
+      const c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(img.naturalWidth*scale));
+      c.height=Math.max(1,Math.round(img.naturalHeight*scale));
+      const ctx=c.getContext("2d");
+      ctx.fillStyle="white";ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(img,0,0,c.width,c.height);
+      return await new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(Error()),"image/jpeg",.82));
+    } finally {URL.revokeObjectURL(url)}
+  }
+
+  $("svFile").onchange = async e => {
+    const f=e.target.files[0],d=day;
+    e.target.value="";
+    if(!f||busy||!ready||d<0)return;
+    if(photoURL&&!confirm("取代當天相片？原有錄音會保留。"))return;
+    busy=true;controls();say("正在儲存相片……");
+    try{
+      await save(d,"photo",await makePhoto(f));
+      if(day===d)await display(d,"✓ 相片已儲存。");
+    }catch{if(day===d)say("未能儲存相片。請試一張較小的 JPEG 相片，並檢查手機空間。")}
+    finally{busy=false;controls()}
+  };
+
+  function stopRec(){if(recorder?.state==="recording")recorder.stop()}
+  $("svStop").onclick=stopRec;
+  $("svRec").onclick=async()=>{
+    if(busy||!ready||day<0||!micOK)return;
+    if(audioURL&&!confirm("重新錄音？成功儲存後才會取代當天舊錄音。"))return;
+    const d=day;let stream;
+    busy=true;controls();say("請允許使用麥克風……");
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      if(day!==d||document.hidden)throw Error("left");
+      const r=new MediaRecorder(stream), chunks=[];
+      let failed=false;
+      recorder=r;
+      r.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+      r.onerror=()=>{failed=true;stopRec()};
+      r.onstop=async()=>{
+        clearTimeout(timer);stream.getTracks().forEach(t=>t.stop());
+        recorder=null;controls();
+        if(day===d)say("正在儲存錄音……");
+        try{
+          if(failed||!chunks.length)throw Error();
+          await save(d,"audio",new Blob(chunks,{type:r.mimeType||chunks[0].type}));
+          if(day===d)await display(d,"✓ 錄音已儲存，按 ▶ 可聽回。");
+        }catch{if(day===d)say("錄音未能儲存，請檢查手機空間後再試。")}
+        finally{busy=false;controls()}
+      };
+      r.start();controls();
+      say("🔴 錄音中。說完按「停止並儲存」；30 秒後會自動停止。");
+      timer=setTimeout(stopRec,30000);
+    }catch{
+      stream?.getTracks().forEach(t=>t.stop());
+      recorder=null;busy=false;controls();
+      if(day===d)say("未能開始錄音。請確認已允許此網站使用麥克風，再試一次。");
+    }
+  };
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)stopRec()});
+
+  $("svDel").onclick=async()=>{
+    const d=day;
+    if(busy||!ready||d<0||!confirm("刪除今天的相片和錄音？文字手記及印章不會改動。"))return;
+    busy=true;controls();
+    try{await save(d,"both");if(day===d)await display(d,"當天影音已刪除。")}
+    catch{if(day===d)say("未能刪除，請再試一次。")}
+    finally{busy=false;controls()}
+  };
+})();
+</script></body>
+</html>
+
 })();
 </script>
 <!-- 開場結束；下方保留原有的 <main> -->
