@@ -226,5 +226,235 @@ el("export").onclick = () => {
 };
 showHome();
 </script>
-</body>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const detail = $("detail"), label = $("day"), anchor = $("status");
+  if (!detail || !label || !anchor || $("sceneVoice")) return;
+
+  const box = document.createElement("section");
+  box.id = "sceneVoice";
+  box.innerHTML = `
+    <style>
+      #sceneVoice{border-top:1px solid #d8d0c0;margin-top:22px;padding-top:15px}
+      #sceneVoice h3{margin:0;color:#193f45;font-size:22px}
+      #sceneVoice .svrow{margin:16px 0}
+      #sceneVoice label,#sceneVoice b{display:block;margin-bottom:5px}
+      #sceneVoice input{font:inherit;max-width:100%}
+      #sceneVoice img{display:block;max-width:100%;max-height:340px;margin:10px auto;border-radius:12px}
+      #sceneVoice audio{width:100%;margin-top:8px}
+      #sceneVoice button,#sceneVoice a{display:inline-block;font:inherit;
+        margin:5px 5px 0 0;padding:8px 12px;border:0;border-radius:9px}
+      #sceneVoice button{background:#205851;color:white}
+      #sceneVoice button:disabled{opacity:.5}
+      #sceneVoice a{background:#e4eeea;color:#205851;text-decoration:none}
+      #sceneVoice #svDel{background:#f3e8df;color:#783c2c}
+      #sceneVoice small{display:block;margin-top:7px}
+      #sceneVoice [hidden]{display:none!important}
+    </style>
+    <h3>一景一聲</h3>
+    <p id="svPrompt"></p>
+    <div class="svrow">
+      <label for="svFile">一景｜拍照或從相簿選一張</label>
+      <input id="svFile" type="file" accept="image/*" disabled>
+      <img id="svImg" alt="我在這一天拍下的考察相片" hidden>
+      <a id="svSavePic" hidden>下載相片備份</a>
+    </div>
+    <div class="svrow">
+      <b>一聲｜錄下你想記住的一句話</b>
+      <button id="svRec" type="button" disabled>● 開始錄音</button>
+      <button id="svStop" type="button" hidden>■ 停止並儲存</button>
+      <audio id="svPlay" controls hidden></audio>
+      <a id="svSaveSound" hidden>下載錄音備份</a>
+    </div>
+    <p id="svMsg" role="status">正在讀取當天的記錄……</p>
+    <button id="svDel" type="button" hidden>刪除當天影音</button>
+    <small>只儲存在這部裝置，不等於已交功課。請定期下載備份。
+    只在允許拍攝的地方使用，錄下自己的聲音即可。</small>`;
+  anchor.after(box);
+
+  const prompts = [
+    "古城初見：哪個細節令你覺得「我已經來到西安」？",
+    "人物觀察：我最希望你留意照片中的……",
+    "走出關外：如果我是古代旅人，眼前的景象會令我……",
+    "敦煌一刻：有些細節不宜拍下，但我想用聲音記住……",
+    "展品追問：看過這件展品，我最想問的是……",
+    "回望旅程：如果把這張相寄給第一天的自己，我想說……"
+  ];
+  const micOK = !!(navigator.mediaDevices?.getUserMedia && window.MediaRecorder);
+  let db, day = -1, token = 0, busy = false, ready = false;
+  let recorder = null, timer = 0, photoURL = "", audioURL = "";
+  const say = s => $("svMsg").textContent = s;
+  const show = (id,on) => $(id).hidden = !on;
+
+  function controls() {
+    $("svFile").disabled = busy || !ready;
+    $("svRec").disabled = busy || !ready || !micOK;
+    $("svDel").disabled = busy || !ready;
+    const recording = recorder?.state === "recording";
+    show("svRec",!recording); show("svStop",recording);
+  }
+
+  function getDB() {
+    return new Promise((ok,no) => {
+      const q = indexedDB.open("silkroad-daily-media-2026",1);
+      q.onupgradeneeded = () => q.result.createObjectStore("media");
+      q.onsuccess = () => ok(q.result);
+      q.onerror = () => no(q.error);
+    });
+  }
+  function read(key) {
+    return new Promise((ok,no) => {
+      const q = db.transaction("media").objectStore("media").get(key);
+      q.onsuccess = () => ok(q.result);
+      q.onerror = () => no(q.error);
+    });
+  }
+  function save(d,kind,blob) {
+    return new Promise((ok,no) => {
+      const tx = db.transaction("media","readwrite");
+      tx.oncomplete = ok;
+      tx.onabort = tx.onerror = () => no(tx.error);
+      const store = tx.objectStore("media");
+      if(kind === "both"){
+        store.delete(d+":photo"); store.delete(d+":audio");
+      } else store.put(blob,d+":"+kind);
+    });
+  }
+  function clearView() {
+    $("svPlay").pause();
+    $("svPlay").removeAttribute("src"); $("svPlay").load();
+    $("svImg").removeAttribute("src");
+    if(photoURL) URL.revokeObjectURL(photoURL);
+    if(audioURL) URL.revokeObjectURL(audioURL);
+    photoURL = audioURL = "";
+    for(const id of ["svImg","svPlay","svSavePic","svSaveSound","svDel"]) show(id,false);
+  }
+
+  async function display(d,notice) {
+    const ticket = ++token;
+    clearView(); ready = false; controls();
+    if(d < 0) return;
+    $("svPrompt").textContent = prompts[d];
+    say("正在讀取……");
+    if(!db) return;
+    try {
+      const [p,a] = await Promise.all([read(d+":photo"),read(d+":audio")]);
+      if(ticket !== token) return;
+      const name = "一景一聲-12月"+(18+d)+"日";
+      if(p){
+        photoURL = URL.createObjectURL(p);
+        $("svImg").src = $("svSavePic").href = photoURL;
+        $("svSavePic").download = name+".jpg";
+        show("svImg",true); show("svSavePic",true);
+      }
+      if(a){
+        audioURL = URL.createObjectURL(a);
+        $("svPlay").src = $("svSaveSound").href = audioURL;
+        $("svSaveSound").download = name+
+          (a.type.includes("mp4")?".m4a":a.type.includes("ogg")?".ogg":".webm");
+        show("svPlay",true); show("svSaveSound",true);
+      }
+      show("svDel",!!(p||a));
+      $("svRec").textContent = a ? "● 重新錄音" : "● 開始錄音";
+      ready = true;
+      say((notice || (p&&a ? "✓ 當天的一景一聲已收藏。" :
+        p ? "✓ 相片已儲存，可以再錄一句話。" :
+        a ? "✓ 聲音已儲存，可以再加一張相。" : "今天的一景一聲仍是空白的。"))
+        + (micOK ? "" : " 此瀏覽器不支援直接錄音。"));
+    } catch { if(ticket===token) say("未能讀取本機記錄，請不要清除網站資料。"); }
+    controls();
+  }
+
+  // 從每天原有的「第 1 天」「第 2 天」標題辨認日期。
+  function syncDay() {
+    const match = label.textContent.match(/第\s*([1-6])\s*天/);
+    const next = !detail.hidden && match ? Number(match[1])-1 : -1;
+    if(next===day) return;
+    if(recorder?.state==="recording") recorder.stop();
+    day=next; display(day);
+  }
+  const observer = new MutationObserver(syncDay);
+  observer.observe(label,{childList:true,characterData:true,subtree:true});
+  observer.observe(detail,{attributes:true,attributeFilter:["hidden"]});
+  syncDay();
+  getDB().then(value=>{db=value;display(day)}).catch(()=>{
+    say("無法開啟本機影音儲存，請用平日開啟手記的 Safari 或主畫面圖示再試。");
+  });
+
+  async function makePhoto(file) {
+    const url = URL.createObjectURL(file);
+    try{
+      const img = new Image(); img.src=url; await img.decode();
+      const scale = Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight));
+      const c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(img.naturalWidth*scale));
+      c.height=Math.max(1,Math.round(img.naturalHeight*scale));
+      const ctx=c.getContext("2d");
+      ctx.fillStyle="white";ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(img,0,0,c.width,c.height);
+      return await new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(Error()),"image/jpeg",.82));
+    } finally {URL.revokeObjectURL(url)}
+  }
+
+  $("svFile").onchange = async e => {
+    const f=e.target.files[0],d=day;
+    e.target.value="";
+    if(!f||busy||!ready||d<0)return;
+    if(photoURL&&!confirm("取代當天相片？原有錄音會保留。"))return;
+    busy=true;controls();say("正在儲存相片……");
+    try{
+      await save(d,"photo",await makePhoto(f));
+      if(day===d)await display(d,"✓ 相片已儲存。");
+    }catch{if(day===d)say("未能儲存相片。請試一張較小的 JPEG 相片，並檢查手機空間。")}
+    finally{busy=false;controls()}
+  };
+
+  function stopRec(){if(recorder?.state==="recording")recorder.stop()}
+  $("svStop").onclick=stopRec;
+  $("svRec").onclick=async()=>{
+    if(busy||!ready||day<0||!micOK)return;
+    if(audioURL&&!confirm("重新錄音？成功儲存後才會取代當天舊錄音。"))return;
+    const d=day;let stream;
+    busy=true;controls();say("請允許使用麥克風……");
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      if(day!==d||document.hidden)throw Error("left");
+      const r=new MediaRecorder(stream), chunks=[];
+      let failed=false;
+      recorder=r;
+      r.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+      r.onerror=()=>{failed=true;stopRec()};
+      r.onstop=async()=>{
+        clearTimeout(timer);stream.getTracks().forEach(t=>t.stop());
+        recorder=null;controls();
+        if(day===d)say("正在儲存錄音……");
+        try{
+          if(failed||!chunks.length)throw Error();
+          await save(d,"audio",new Blob(chunks,{type:r.mimeType||chunks[0].type}));
+          if(day===d)await display(d,"✓ 錄音已儲存，按 ▶ 可聽回。");
+        }catch{if(day===d)say("錄音未能儲存，請檢查手機空間後再試。")}
+        finally{busy=false;controls()}
+      };
+      r.start();controls();
+      say("🔴 錄音中。說完按「停止並儲存」；30 秒後會自動停止。");
+      timer=setTimeout(stopRec,30000);
+    }catch{
+      stream?.getTracks().forEach(t=>t.stop());
+      recorder=null;busy=false;controls();
+      if(day===d)say("未能開始錄音。請確認已允許此網站使用麥克風，再試一次。");
+    }
+  };
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)stopRec()});
+
+  $("svDel").onclick=async()=>{
+    const d=day;
+    if(busy||!ready||d<0||!confirm("刪除今天的相片和錄音？文字手記及印章不會改動。"))return;
+    busy=true;controls();
+    try{await save(d,"both");if(day===d)await display(d,"當天影音已刪除。")}
+    catch{if(day===d)say("未能刪除，請再試一次。")}
+    finally{busy=false;controls()}
+  };
+})();
+</script></body>
 </html>
