@@ -136,7 +136,50 @@ footer{margin-top:18px;font-size:13px}
   intro.addEventListener("animationend", event => {
     if (event.animationName === "silkExit") remove();
   });
-  setTimeout(remove, 1800);
+    // 新版片頭：展示 2.2 秒，淡出 0.4 秒，共 2.6 秒。
+  intro.style.animation = "silkExit .4s ease-in 2.2s forwards";
+  intro.style.background =
+    "radial-gradient(ellipse at 68% 28%, #345954 0%, #193f45 52%, #112e33 100%)";
+
+  const wrap = intro.querySelector(".silkWrap");
+  wrap.style.cssText = "position:relative;z-index:1;width:min(84vw,350px)";
+
+  // 保留原有絲路金線，抵達敦煌時讓終點亮起。
+  wrap.querySelector(".silkLine").style.animationDuration = "1.1s";
+  const destination = wrap.querySelector("svg circle:last-of-type");
+  if (destination && destination.animate) {
+    destination.animate(
+      [{ opacity: 0.25 }, { opacity: 1 }],
+      { delay: 1220, duration: 320, easing: "ease-out", fill: "both" }
+    );
+  }
+
+  // 底部沙丘：直接繪製，不用另外下載圖片。
+  intro.insertAdjacentHTML("afterbegin", `
+    <svg viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true"
+         style="position:absolute;bottom:0;left:0;width:100%;height:24%;pointer-events:none">
+      <path d="M0 66 Q62 76 138 40 T282 39 T400 24 V100 H0Z"
+            fill="#dfbf89" opacity=".10"/>
+      <path d="M0 83 Q65 52 138 65 T285 57 T400 51 V100 H0Z"
+            fill="#d2a36a" opacity=".16"/>
+      <path d="M0 83 Q65 52 138 65 T285 57 T400 51"
+            fill="none" stroke="#e9ca96" stroke-opacity=".5"
+            stroke-width="1" vector-effect="non-scaling-stroke"/>
+    </svg>
+  `);
+
+  // 校本署名：放在「西安／敦煌」下方，兩行同時顯示。
+  wrap.insertAdjacentHTML("beforeend", `
+    <div style="margin:24px auto 12px;width:58px;height:1px;
+                background:linear-gradient(90deg,transparent,#dbb77e,transparent)"></div>
+    <div style="color:#fff5e3;font:600 clamp(17px,4.5vw,20px)/1.6 ui-serif,'Songti TC',serif;
+                letter-spacing:.08em">順德聯誼總會胡兆熾中學</div>
+    <div style="margin-top:3px;color:#e8cfa7;font:500 14px/1.6 system-ui,sans-serif;
+                letter-spacing:.16em">校外事務委員會</div>
+  `);
+
+  // 正常在 2.6 秒淡出；若瀏覽器沒有送出動畫結束事件，仍會自動移除。
+  setTimeout(remove, 3000);
 })();
 </script>
 <!-- 開場結束；下方保留原有的 <main> -->
