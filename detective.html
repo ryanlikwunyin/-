@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#193f45">
+<title>兵馬俑密探｜雙機測試房</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f2e9;color:#223639;font:17px/1.65 system-ui,sans-serif}
+main{max-width:620px;margin:auto;padding:18px}
+header,section{padding:20px;border-radius:16px;margin-bottom:14px}
+header{background:#193f45;color:#fff9ed}
+h1{font:700 32px/1.3 ui-serif,serif;margin:6px 0}
+h2{font-size:19px;margin:0 0 6px}
+p{margin:6px 0 12px}section{background:#fffdf8;border:1px solid #d8d2c5}
+button,input{font:inherit}
+button{padding:10px 15px;margin:5px 4px 5px 0;border:0;border-radius:10px;
+background:#205851;color:white;cursor:pointer}
+button:disabled{opacity:.55;cursor:default}
+input{width:100%;padding:10px;border:1px solid #899a96;border-radius:8px}
+small{display:block;color:#526462}
+#clue{border-left:3px solid #bd8253;padding:6px 12px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<header><div>絲路研學誌 ／ 雙機測試</div><h1>兵馬俑密探</h1>
+<p>一位出題，一位追查。這一局只傳一條文字線索。</p></header>
+
+<section>
+  <h2 id="role">連線準備</h2>
+  <p id="msg" role="status">正在載入遊戲。若長時間沒有變化，請檢查網絡，再重新整理。</p>
+  <small id="net"></small>
+  <button id="start" hidden>建立測試房</button>
+</section>
+
+<section id="invitePanel" hidden>
+  <h2>邀請你的拍檔</h2>
+  <p>只把這條連結私下傳給乙，不要貼到班群。</p>
+  <input id="invite" readonly aria-label="拍檔邀請連結">
+  <button id="copy">複製邀請連結</button>
+  <small id="copyMsg"></small>
+</section>
+
+<section id="game" hidden>
+  <h2>本局線索</h2>
+  <p id="clue">暫時未有線索。</p>
+  <button id="send" hidden>傳送測試線索</button>
+  <button id="ack" hidden>我收到線索了</button>
+</section>
+
+<button id="closeRoom" hidden>結束並刪除測試房</button>
+<p><a href="./index.html">← 返回絲路研學誌</a></p>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+import { getDatabase, ref, child, get, set, remove, onValue }
+  from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyDfdUGTlu05fmgqTZpjGED0mSubk0-b4Ew",
+  authDomain: "silkroad-detective.firebaseapp.com",
+  projectId: "silkroad-detective",
+  appId: "1:552417507719:web:95c13c686d3ba4a0b67b22",
+  databaseURL: "https://silkroad-detective-default-rtdb.asia-southeast1.firebasedatabase.app"
+});
+
+const db = getDatabase(app), auth = getAuth(app);
+const el = id => document.getElementById(id);
+const say = text => el("msg").textContent = text;
+const code = e => e?.code || e?.message || "未知錯誤";
+const incoming = location.hash.slice(1);
+const valid = /^[0-9a-f]{32}$/;
+let uid, room, host = false, online = false, stop = null;
+let busy = false, ended = false;
+
+function refreshButtons() {
+  for (const id of ["start","send","ack","closeRoom"])
+    el(id).disabled = busy || !online || ended;
+}
+
+function finish(text) {
+  ended = true;
+  if (stop) stop();
+  for (const id of ["start","invitePanel","game","closeRoom"])
+    el(id).hidden = true;
+  say(text);
+}
+
+async function act(fn) {
+  if (busy || ended || !online) return;
+  busy = true; refreshButtons();
+  try { await fn(); }
+  catch (e) {
+    say("未能完成：" + code(e) +
+      "。如正在加入，房間可能已滿或已關閉。");
+  } finally {
+    busy = false; refreshButtons();
+  }
+}
+
+function watchRoom(id) {
+  history.replaceState(null,"","#" + id);
+  el("start").hidden = true;
+  el("role").textContent = host ? "甲｜出題人" : "乙｜偵探";
+  el("game").hidden = false;
+  el("closeRoom").hidden = !host;
+  el("invite").value = location.href;
+  stop = onValue(room, snap => {
+    const r = snap.val();
+    if (!r) { finish("這間測試房已結束。"); return; }
+    el("invitePanel").hidden = !host || !!r.guest;
+    el("send").hidden = !host || !r.guest || !!r.clue;
+    el("ack").hidden = host || !r.clue || !!r.received;
+    el("clue").textContent = r.clue || "暫時未有線索。";
+    if (r.received) say(host ? "✓ 拍檔已按「收到」，雙機來回測試成功！" :
+                                  "✓ 你已按「收到」，請甲查看自己的畫面。");
+    else if (r.clue) say(host ? "線索已顯示，等待拍檔確認。" : "收到線索，請按下面的確認按鈕。");
+    else if (r.guest) say(host ? "拍檔已加入，可以傳送線索。" : "已加入，等待甲傳送線索。");
+    else say("測試房已建立，請把邀請連結傳給乙。");
+    refreshButtons();
+  }, e => finish("房間已關閉或無法再讀取：" + code(e)));
+}
+
+el("copy").onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(el("invite").value);
+    el("copyMsg").textContent = "已複製，可以私下傳給拍檔。";
+  } catch {
+    el("invite").select();
+    el("copyMsg").textContent = "請長按上面的網址，選「複製」。";
+  }
+};
+
+el("start").onclick = () => act(async () => {
+  const id = incoming || crypto.randomUUID().replaceAll("-","");
+  room = ref(db,"testRooms/" + id);
+  if (!incoming) {
+    await set(child(room,"host"),uid);
+    host = true;
+  } else {
+    // 已是成員可重開；新來者只嘗試佔用自己的偵探席。
+    let existing = null;
+    try { existing = (await get(room)).val(); } catch {}
+    if (existing?.host === uid) host = true;
+    else if (existing?.guest !== uid) await set(child(room,"guest"),uid);
+  }
+  watchRoom(id);
+});
+el("send").onclick = () => act(() =>
+  set(child(room,"clue"),"請找一件有四隻腳、但不會自己行走的課室物件。"));
+el("ack").onclick = () => act(() => set(child(room,"received"),true));
+el("closeRoom").onclick = () => act(async () => {
+  if (!confirm("確定結束並刪除這間測試房？")) return;
+  await remove(room);
+  finish("測試房已刪除。你可以返回絲路研學誌。");
+});
+
+try {
+  if (incoming && !valid.test(incoming)) throw Error("邀請連結不完整");
+  await auth.authStateReady();
+  uid = (auth.currentUser || (await signInAnonymously(auth)).user).uid;
+  el("start").textContent = incoming ? "加入／重返這間房" : "建立測試房";
+  el("start").hidden = false;
+  say(incoming ? "已收到邀請。連線後，按下方按鈕加入。" :
+                 "準備好了。請甲建立測試房，乙稍後使用邀請連結。");
+  refreshButtons();
+  onValue(ref(db,".info/connected"), snap => {
+    online = snap.val() === true;
+    el("net").textContent = online ? "● 已連上即時資料庫" :
+      "○ 未連上即時資料庫；請保持連線，暫時不要關閉頁面。";
+    refreshButtons();
+  });
+} catch (e) {
+  say("未能開始：" + code(e) + "。請記下這個錯誤提示。");
+}
+</script>
+</body>
+</html>
