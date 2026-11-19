@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#193f45">
+<meta name="apple-mobile-web-app-title" content="絲路研學誌">
+<title>省外行–絲綢之路沿線城市：敦煌、西安歷史文化及藝術探索之旅</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f2e9;color:#223639;font:17px/1.65 system-ui,sans-serif}
+main{max-width:680px;margin:auto;padding:16px 16px 48px}
+header{position:relative;overflow:hidden;background:#193f45;color:#fff9ea;border-radius:20px;padding:24px 22px 54px}
+header svg{position:absolute;bottom:0;left:0;width:100%;height:42px}
+.eyebrow{font-size:13px;letter-spacing:.1em;font-weight:650}
+h1,h2{font-family:ui-serif,"Songti TC",serif;line-height:1.3}
+h1{font-size:38px;margin:10px 0}
+h2{font-size:26px;margin:8px 0}
+h3{font-size:18px;margin:20px 0 4px}
+p{margin:4px 0 12px}
+header p{max-width:30em;margin:0}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:20px}
+small,footer{color:#506366}
+button,textarea{font:inherit}
+button{cursor:pointer}
+.card,article{background:#fffdf8;border:1px solid #d9d4c7;border-radius:14px}
+.card{width:100%;display:flex;align-items:center;gap:16px;text-align:left;padding:14px;color:inherit;margin:0 0 9px}
+.card strong,.card small{display:block}
+.date{color:#8c432b;font-weight:700;white-space:nowrap}
+.arrow{margin-left:auto;color:#8c432b}
+article{padding:20px;margin-top:12px}
+.action{background:#193f45;color:white;border:0;border-radius:10px;padding:10px 15px;margin-top:12px}
+textarea{width:100%;min-height:140px;padding:12px;border:1px solid #859692;border-radius:9px;background:white;color:inherit;margin-top:6px}
+#status{display:block;min-height:26px}
+footer{margin-top:18px;font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="eyebrow">西安 × 敦煌　｜　2026.12.18—12.23</div>
+  <h1>絲路研學誌</h1>
+  <p>省外行–絲綢之路沿線城市：敦煌、西安歷史文化及藝術探索之旅</p>
+  <svg viewBox="0 0 600 42" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 35 Q95 -12 200 22 T410 17 T600 20 V42 H0Z" fill="#c89466"/>
+    <path d="M0 40 Q100 15 190 32 T400 28 T600 24 V42 H0Z" fill="#ead2ac"/>
+  </svg>
+</header>
+
+<section id="home">
+  <div class="bar"><h2>六天行旅</h2><small id="progress"></small></div>
+  <p>選一天，帶着問題出發。先收起手機觀察，再記下一個發現。</p>
+  <div id="cards"></div>
+  <button class="action" id="export">匯出我的六天手記</button>
+</section>
+
+<section id="detail" hidden>
+  <button class="action" id="back">← 返回六天行旅</button>
+  <article>
+    <div class="eyebrow date" id="day"></div>
+    <h2 id="heading"></h2>
+    <small id="places"></small>
+    <h3>出發前讀一讀</h3><p id="reading"></p>
+    <h3>現場小任務</h3><p id="task"></p>
+    <label for="note"><b>我的考察手記</b></label>
+    <textarea id="note" placeholder="我留意到……"></textarea>
+    <small id="status" role="status"></small>
+  </article>
+</section>
+
+<footer>行程以當日實際安排為準。筆記只存於這個瀏覽器，不會傳送給老師。建議每天匯出備份。</footer>
+</main>
+<script>
+const days = [
+  ["西安","古城怎樣說故事？","西安鼓樓・大唐不夜城",
+   "鼓樓曾以鼓聲報時。今天的大唐不夜城則透過燈光、街景和演出呈現人們對盛唐的想像。眼前的景象，哪些是你看見的，哪些是你聯想到的？",
+   "選一個細節，寫兩句：「我實際看見……」「這使我想到……」。讓沒到場的同學也能分辨觀察和聯想。"],
+  ["西安","一張陶俑尋人卡","院校教育交流・秦始皇帝陵博物院・文化體驗",
+   "先看整個俑陣，再選定一尊陶俑。髮式、衣着和姿勢是同學可以核對的線索；「很威武」則是觀賞者的感受。",
+   "不透露陶俑的位置，用三個可見細節寫一張尋人卡。請同學猜猜你描述的是哪一尊。"],
+  ["敦煌","給關外旅人的提醒","陽關遺址及博物館・玉門關遺址・敦煌雅丹國家地質公園",
+   "關隘是古代交通的重要節點。今天乘車經過的路面和地形，對步行或隨駝隊出行的人，可能意味着不同的困難。",
+   "如果只能給古代旅人一項提醒，你會說甚麼？用今天親眼見到的一個地形特徵，解釋你的建議。"],
+  ["敦煌","留住一幅畫","鳴沙山月牙泉・莫高窟・敦煌石窟文物保護研究陳列中心・沙洲夜市",
+   "欣賞壁畫時，可以只留意一個人物動作、一條衣帶或一種顏色。到了保護展覽，再想想：要讓後人也能看見這個細節，保護人員要處理甚麼問題？",
+   "遵守場館規定，洞窟內不用手機。離開後憑記憶描述一個畫面，再根據導賞或展板寫下一項保護措施。"],
+  ["敦煌","跟着一件展品追問","敦煌市博物館・絲綢之路與「一帶一路」專題講座",
+   "沿絲路流動的不只是貨物。人們也帶着圖案、技藝和習俗遠行。讀展品說明時，留意甚麼是有記載的資料，甚麼是你自己的推測。",
+   "寫下一件展品的名稱和一個細節。試用講座中的一個觀點解讀它；若未能連起來，寫一條想問講者的問題。"],
+  ["西安","今天由我導賞","大唐芙蓉園",
+   "園林以空間、建築和景觀呈現唐文化。回想第一晚在西安的觀察：經過六天考察，你現在會怎樣向別人介紹眼前的景象？",
+   "為下一屆同學寫約 50 字導賞。推薦一處值得停下來的地方，指出一個容易錯過的細節，並說明它為何值得看。"]
+];
+
+const el = id => document.getElementById(id);
+const key = "silkroad-fieldnotes-2026-v1";
+let current = 0, notes = Array(6).fill(""), storageOK = true;
+
+try {
+  const saved = JSON.parse(localStorage.getItem(key) || "null");
+  if (Array.isArray(saved))
+    notes = notes.map((_, i) => typeof saved[i] === "string" ? saved[i] : "");
+} catch { storageOK = false; }
+
+function showHome() {
+  el("home").hidden = false;
+  el("detail").hidden = true;
+  el("cards").replaceChildren();
+  el("progress").textContent = "已寫 " + notes.filter(s => s.trim()).length + " / 6 天";
+  days.forEach((d, i) => {
+    const b = document.createElement("button");
+    b.className = "card";
+    b.innerHTML = '<span class="date">12/' + (18+i) + '</span><span><strong>' +
+      d[1] + '</strong><small>' + d[0] + ' · ' +
+      (notes[i].trim() ? "已有筆記" : "待探索") +
+      '</small></span><span class="arrow">›</span>';
+    b.onclick = () => showDay(i);
+    el("cards").append(b);
+  });
+  window.scrollTo(0, 0);
+}
+function showDay(i) {
+  current = i;
+  const d = days[i];
+  el("home").hidden = true;
+  el("detail").hidden = false;
+  el("day").textContent = "第 " + (i+1) + " 天　｜　12 月 " + (18+i) + " 日　｜　" + d[0];
+  ["heading","places","reading","task"].forEach((id,n) => el(id).textContent = d[n+1]);
+  el("note").value = notes[i];
+  el("status").textContent = storageOK ? "輸入後會自動儲存在此瀏覽器。" : "未能確認本機儲存，離開前請匯出備份。";
+  window.scrollTo(0, 0);
+}
+el("note").oninput = () => {
+  notes[current] = el("note").value;
+  try {
+    localStorage.setItem(key, JSON.stringify(notes));
+    storageOK = true;
+    el("status").textContent = "✓ 已儲存在此瀏覽器，未提交給老師。";
+  } catch {
+    storageOK = false;
+    el("status").textContent = "未能儲存。請返回六天行旅並匯出備份。";
+  }
+};
+el("back").onclick = showHome;
+el("export").onclick = () => {
+  const text = document.title + "\n\n" + days.map((d,i) =>
+    "12/" + (18+i) + "　" + d[0] + "｜" + d[1] + "\n" +
+    d[4] + "\n我的筆記：" + (notes[i].trim() || "（未填寫）")
+  ).join("\n\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF",text], {type:"text/plain;charset=utf-8"}));
+  const a = document.createElement("a");
+  a.href = url; a.download = "絲路研學誌.txt";
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+};
+showHome();
+</script>
+</body>
+</html>
